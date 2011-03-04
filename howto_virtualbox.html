@@ -1,0 +1,208 @@
+<h1>VirtualBox Sanal Makine Kurulumu</h1>
+
+<p>Makineniz yeterince güçlüyse sanal makine kurmanızı öneririm.  Sanal
+makineyi "çalışılabilir" preformansta kullanabilmeniz için asgari 2 GB,
+çift çekirdekli (64 bit, yani amd64 mimarisi) bir makine öneririm.  Bu
+özelliklerden yoksun makineler de olur ama her şey yavaşlayacaktır.</p>
+
+<h2>Sanallaştırma neye yarar?</h2>
+
+<ul>
+<li><p>Linux vb yeni öğrenmekte olduğunuz işletim sistemlerini çekinmeden
+kurcalamanıza yarar.  Bu anlamda eğitsel değeri büyüktür.</p></li>
+<li><p>Ana çalışma makinenize dokunmadan veya ikinci bir makine edinmeden
+test ortamları oluşturmanıza yarar.  Örneğin bu şekilde bir web sunucu
+oluşturabilir ve bu sunucuya istediğiniz web yazılımlarını
+kurabilirsiniz.  Özellikle sistem yöneticileri ve web geliştiricileri
+için bulunmaz bir fırsat.</p></li>
+<li><p>Geliştirdiğiniz yazılımları farklı işletim sistemlerinde denemenize
+yarar.  Örneğin lisanslı bir Windows edinerek Ubuntu kurulu
+makinenizde bir Windows sanal makinesi oluşturabilir ve geliştrdiğiniz
+çapraz platform bir yazılımın testlerini yapabilirsiniz.</p></li>
+<li><p>Ve bunun gibi daha pek çok yarar...</p></li>
+</ul>
+
+<h2>Sanal Makine Kurulum İmajının Seçimi</h2>
+
+<p>Sanal makinede hangi işletim sistemi/dağıtımı kullanmak istiyorsanız
+gerekli kurulum programı veya imajı edinmek zorundasınız.  Unutmayın bu
+işlemin normal bir kurulumdan farkı yok.  Yani yasal olmayan bir şekilde
+lisanssız yazılım kullanmayın.</p>
+
+<p>Bu dokümanda özellikle web yazılımları üzerinde çalışmak istediğinizi ve
+bir sanal sunucu kurmak istediğinizi varsayacağım.  Debian Lenny veya
+Ubuntu Lucid Sunucu Edisyonu uygun bir seçim olabilir.  64 bit Ubuntu
+Lucid Sunucu Edisyonu üzerinden gidelim.</p>
+
+<ul>
+<li><p>Ubuntu Lucid Sunucu Edisyonu kurmakta kullanacağınız imajı indirin:</p>
+
+<p>wget http://cdimage.ubuntu.com/ubuntu-server/daily/current/lucid-server-amd64.iso</p></li>
+</ul>
+
+<p>Sanallaştırma terminolojisinde sanal makine olarak kuracağınız bu
+sisteme "Guest OS" deniliyor.</p>
+
+<h2>Sanallaştırıcı (VirtualBox) Kurulumu</h2>
+
+<p>64 bit mimaride (amd64) Debian veya Ubuntu gibi bir Debian türevi
+kullandığınız varsayıyoruz.  Gerçek makinede çalışan bu sisteme "Host
+OS" deniliyor.</p>
+
+<p>VirtualBox kurulum sırasında derlenen özel bir kernel modülü kullanıyor.
+Kurulum sırasında bir sorunla karşılaşmamanız öncelikle gerekli bir
+takım paketleri kurun:</p>
+
+<pre><code>   sudo apt-get install build-essential linux-headers-$(uname -r)
+</code></pre>
+
+<p>VirtualBox için aşağıdaki adrese girerek uygun APT kaynağını ekleyin.</p>
+
+<pre><code>   http://www.virtualbox.org/wiki/Linux_Downloads
+</code></pre>
+
+<ul>
+<li><p>Örneğin Debian Lenny kullanıyorsanız aşağıdaki satırı APT kaynaklarına
+ekleyin.</p>
+
+<p>deb http://download.virtualbox.org/virtualbox/debian lenny non-free</p>
+
+<p>Bu işlemi şöyle yapmanızı öneririm (tırnaklara dikkat edin):</p>
+
+<p>sudo sh -c 'deb http://download.virtualbox.org/virtualbox/debian lenny non-free >/etc/apt/sources.list.d/virtualbox.list'</p></li>
+<li><p>Ubuntu Lucid kullanıyorsanız:</p>
+
+<p>sudo sh -c 'deb http://download.virtualbox.org/virtualbox/debian lucid non-free >/etc/apt/sources.list.d/virtualbox.list'</p></li>
+<li><p>Depo anahtarını ekleyin:</p>
+
+<p>wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -</p></li>
+<li><p>İndeksleri güncelleyin ve kurulumu yapın:</p>
+
+<p>sudo apt-get update
+   sudo apt-get install virtualbox-3.2</p></li>
+<li><p>Kurulum sırasında VirtualBox bir çekirdek modülü derleyecektir.  Bu
+işlem biraz vakit alabilir.</p></li>
+</ul>
+
+<h2>Sanal Makine Kurulumu</h2>
+
+<p>VirtualBox'ı çalıştırarak önceki adımlarda indirmiş olduğumuz imajın
+kurulumunu sanal ortamda yapacağız.  Bu noktada küçük bir uyarı.  Eğer
+sisteminizde sanallaştırmada kullanılan bir başka modül olan <code>kvm</code>
+etkinse onu kaldırmalısınız.  Aşağıdaki komut boş dönüyorsa bu adımı
+atlayın, aksi halde bu adımı atlayın:</p>
+
+<pre><code>   lsmod | grep kvm
+</code></pre>
+
+<p>Komut çıktısında <code>kvm</code>'yi görüyorsanız bunu kaldırmamız ve bu işlemi
+kalıcı hale getirmemiz gerekiyor.</p>
+
+<pre><code>   sudo sh -c 'printf "kvm_intel\nkvm" &gt;&gt;/etc/modprobe.d/blacklist.conf'
+   sudo update-initramfs -u
+   sudo modprobe -r kvm_intel
+   sudo modprobe -r kvm
+</code></pre>
+
+<p>VirtualBox'ı çalıştırarak talimatları izleyin.</p>
+
+<ul>
+<li><p>Program iletileri Türkçe çıkmıyorsa File → Preferences → Language
+menüsünden Türkçe'yi seçin.</p></li>
+<li><p>"Yeni"ye tıklayarak sanal makine oluşturma sihirbazını başlatın ve
+makinenize uygun bir isim verin.  (Ubuntu kurulumunda hangi konak
+adını kullanacaksınız bu ismi vermenizi tavsiye ederim).</p></li>
+<li><p>Öntanımlı ayarlarla ilerleyin.  Yani hiçbir adımda (girmeniz gereken
+bir isim vs hariç) tıklamak dışında bir işlem yapmayın.</p></li>
+</ul>
+
+<p>Bu şekilde henüz kurulum yapılmamış bir sanal donanım oluşturmuş
+oldunuz.  Şimdi bu sanal donanıma indirmiş olduğumuz imajı kuracağız.
+Bunun için tek yapılması gereken bu sanal donanımı seçerek çalıştırmak.
+İsmi seçin ve "Başlat"a tıklayın, "İlk Çalıştırma Sihirbazı" çalışıyor
+olmalı.</p>
+
+<ul>
+<li><p>"Yükleme Ortamını Seç" adımı geldiğinde size sunulan seçeneğin yanında
+görülen küçük ikona tıklayın ve karşınıza gelen "CD/DVD Kalıpları"
+sekmesinde "Ekle"ye tıklayarak önceki adımlarda indirmiş olduğunuz
+imajı sabit diskinizde bulun ve seçin.  (Eğer sanal bir Windows
+kurulumu yapmak isteseydik bu adımda Windows CD'sini CD sürücüye
+yerleştirip bunu göstermemiz yeterli olacaktı.)</p></li>
+<li><p>Bu noktadan sonra normal bir Ubuntu kurulumu yapabilirsiniz.
+Kurulumun sonlarında görev seçici aşamasına ulaştığınızda SSH sunucu
+ve (tercihen) LAMP sunucu seçeneklerini işaretlemeyi unutmayın.</p></li>
+</ul>
+
+<h2>Sanal Makine Ayarları</h2>
+
+<p>Artık sanal bir donanımınız ve onun üzerinde çalışan bir sisteminiz var.
+Aşağıdaki ayarları yapmanız halinde bu sistemi çalışma ortamınızda
+bulunan ağa bağlı gerçek bir makine gibi kullanabileceksiniz.</p>
+
+<ul>
+<li><p>Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka
+makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde
+ayarlayın.</p>
+
+<ul><li><p>"Aygıtlar" → "Network Adapters" → "Bağdaştırıcı 1" → "Şuraya
+eklendi" ayarını "Bridged Adapter" olarak değiştirin.</p></li>
+<li><p>Makineyi yeniden başlatın.</p></li>
+<li><p>Makine açıldığında IP adresini kontol edin.  Gerçek makinenizle
+sanal makine artık aynı ağ segmentinde olmalı.   Örneğin gerçek
+makinede ("Host OS") <code>ip addr</code> ile öğrenebileceğiniz IP adresi
+<code>192.168.1.XX</code> ise, sanal makinede ("Guest OS") aynı komutla
+öğreneceğiniz IP adresinin ilk üç segmenti aynı, yani <code>192.168.1.XX</code>
+olmalı.</p></li></ul></li>
+<li><p>Sanal makineye IP vererek değil de konak ismiyle erişmek için sanal
+makineye (ve şayet kurulu değilse gerçek makineye de) aşağıdaki
+kurulumu yapın:</p>
+
+<p>sudo apt-get install --no-install-recommends avahi-daemon</p>
+
+<p>Avahi sayesinde gerçek makineden (veya aynı ağdaki bir başka
+makineden) örneğin konak ismi <code>fuzuli</code> olan bir sanal makineye SSH ile
+ulaşmak için tek yapmanız gerekn konak adına <code>.local</code> alanını eklemek.
+Yani:</p>
+
+<p>ssh fuzuli.local</p></li>
+<li><p>Gerçek makinedeki bir dizini sanal makine ile paylaşabilmek için
+aşağıdaki ayarları yapın:</p>
+
+<ul><li><p>Sanal makineye gerekli paketleri kurun:</p>
+
+<p>sudo apt-get install --no-install-recommends virtualbox-ose-guest-utils virtualbox-ose-guest-dkms</p></li>
+<li><p>VirtualBox altında "Aygıtlar" → "Paylaşılan Dizinler"i tıklayarak
+yeni bir dizin ekleyin.  Örneğin gerçek makinede<code>~/ortak</code> isimli
+dizini <code>ortak</code> adıyla paylaştırın.</p></li>
+<li><p>Sanal makinede uygun bir bağlama noktası oluşturarak paylaşılan
+dizini bu noktaya bağlayın.  Bağlama noktası olarak kullanacağınız
+dizinin ismini gerçek makinenin konak ismiyle aynı yapın.  Örneğin
+gerçek makinenin ismi <code>baki</code> ise:</p>
+
+<p>sudo mkdir -p /srv/ortak/baki
+sudo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki</p></li>
+<li><p>Artık bu noktada paylaşılan dizine okuma/yazma yapabilmeniz lazım.
+Bu ayarın her açılışta etkin olması için sanal makinede
+/etc/rc.local dosyasına bir ekleme yapmalısınız (komutları dikkatli
+şekilde hiçbir karakteri atlamadan yazın).</p>
+
+<p>sudo sh -c 'echo "#!/bin/sh -e" >/etc/rc.local'
+sudo sh -c 'echo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki >>/etc/rc.local'
+sudo sh -c 'echo exit 0 >>/etc/rc.local'</p></li></ul></li>
+</ul>
+
+<p>Hepsi bu kadar.  Artık sanal makinenizi kullanabilirsiniz.  Son bir not.
+Daha konforlu çalışmak için bu makineyi VirtualBox'ın sunduğu pencerede
+çalıştırmak yerine bir konsol açıp SSH ile erişerek kullanmanızı tavsiye
+ederiz.</p>
+
+<ul>
+<li><p>Önce VirtualBox'ı çalıştırın:</p>
+
+<p>VirtualBox &amp;</p></li>
+<li><p>VirtualBox'ta sanal makineyi başlatın ve açılmasını bekleyin.</p></li>
+<li><p>Yeni bir konsol açın ve SSH ile sanal makineye giriş yapın:</p>
+
+<p>ssh fuzuli.local</p></li>
+</ul>
