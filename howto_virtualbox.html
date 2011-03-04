@@ -1,208 +1,1088 @@
-<h1>VirtualBox Sanal Makine Kurulumu</h1>
-
-<p>Makineniz yeterince güçlüyse sanal makine kurmanızı öneririm.  Sanal
-makineyi "çalışılabilir" preformansta kullanabilmeniz için asgari 2 GB,
-çift çekirdekli (64 bit, yani amd64 mimarisi) bir makine öneririm.  Bu
-özelliklerden yoksun makineler de olur ama her şey yavaşlayacaktır.</p>
-
-<h2>Sanallaştırma neye yarar?</h2>
-
-<ul>
-<li><p>Linux vb yeni öğrenmekte olduğunuz işletim sistemlerini çekinmeden
-kurcalamanıza yarar.  Bu anlamda eğitsel değeri büyüktür.</p></li>
-<li><p>Ana çalışma makinenize dokunmadan veya ikinci bir makine edinmeden
-test ortamları oluşturmanıza yarar.  Örneğin bu şekilde bir web sunucu
-oluşturabilir ve bu sunucuya istediğiniz web yazılımlarını
-kurabilirsiniz.  Özellikle sistem yöneticileri ve web geliştiricileri
-için bulunmaz bir fırsat.</p></li>
-<li><p>Geliştirdiğiniz yazılımları farklı işletim sistemlerinde denemenize
-yarar.  Örneğin lisanslı bir Windows edinerek Ubuntu kurulu
-makinenizde bir Windows sanal makinesi oluşturabilir ve geliştrdiğiniz
-çapraz platform bir yazılımın testlerini yapabilirsiniz.</p></li>
-<li><p>Ve bunun gibi daha pek çok yarar...</p></li>
-</ul>
-
-<h2>Sanal Makine Kurulum İmajının Seçimi</h2>
-
-<p>Sanal makinede hangi işletim sistemi/dağıtımı kullanmak istiyorsanız
-gerekli kurulum programı veya imajı edinmek zorundasınız.  Unutmayın bu
-işlemin normal bir kurulumdan farkı yok.  Yani yasal olmayan bir şekilde
-lisanssız yazılım kullanmayın.</p>
-
-<p>Bu dokümanda özellikle web yazılımları üzerinde çalışmak istediğinizi ve
-bir sanal sunucu kurmak istediğinizi varsayacağım.  Debian Lenny veya
-Ubuntu Lucid Sunucu Edisyonu uygun bir seçim olabilir.  64 bit Ubuntu
-Lucid Sunucu Edisyonu üzerinden gidelim.</p>
-
-<ul>
-<li><p>Ubuntu Lucid Sunucu Edisyonu kurmakta kullanacağınız imajı indirin:</p>
-
-<p>wget http://cdimage.ubuntu.com/ubuntu-server/daily/current/lucid-server-amd64.iso</p></li>
-</ul>
-
-<p>Sanallaştırma terminolojisinde sanal makine olarak kuracağınız bu
-sisteme "Guest OS" deniliyor.</p>
-
-<h2>Sanallaştırıcı (VirtualBox) Kurulumu</h2>
-
-<p>64 bit mimaride (amd64) Debian veya Ubuntu gibi bir Debian türevi
-kullandığınız varsayıyoruz.  Gerçek makinede çalışan bu sisteme "Host
-OS" deniliyor.</p>
-
-<p>VirtualBox kurulum sırasında derlenen özel bir kernel modülü kullanıyor.
-Kurulum sırasında bir sorunla karşılaşmamanız öncelikle gerekli bir
-takım paketleri kurun:</p>
-
-<pre><code>   sudo apt-get install build-essential linux-headers-$(uname -r)
-</code></pre>
-
-<p>VirtualBox için aşağıdaki adrese girerek uygun APT kaynağını ekleyin.</p>
-
-<pre><code>   http://www.virtualbox.org/wiki/Linux_Downloads
-</code></pre>
-
-<ul>
-<li><p>Örneğin Debian Lenny kullanıyorsanız aşağıdaki satırı APT kaynaklarına
-ekleyin.</p>
-
-<p>deb http://download.virtualbox.org/virtualbox/debian lenny non-free</p>
-
-<p>Bu işlemi şöyle yapmanızı öneririm (tırnaklara dikkat edin):</p>
-
-<p>sudo sh -c 'deb http://download.virtualbox.org/virtualbox/debian lenny non-free >/etc/apt/sources.list.d/virtualbox.list'</p></li>
-<li><p>Ubuntu Lucid kullanıyorsanız:</p>
-
-<p>sudo sh -c 'deb http://download.virtualbox.org/virtualbox/debian lucid non-free >/etc/apt/sources.list.d/virtualbox.list'</p></li>
-<li><p>Depo anahtarını ekleyin:</p>
-
-<p>wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add -</p></li>
-<li><p>İndeksleri güncelleyin ve kurulumu yapın:</p>
-
-<p>sudo apt-get update
-   sudo apt-get install virtualbox-3.2</p></li>
-<li><p>Kurulum sırasında VirtualBox bir çekirdek modülü derleyecektir.  Bu
-işlem biraz vakit alabilir.</p></li>
-</ul>
-
-<h2>Sanal Makine Kurulumu</h2>
-
-<p>VirtualBox'ı çalıştırarak önceki adımlarda indirmiş olduğumuz imajın
-kurulumunu sanal ortamda yapacağız.  Bu noktada küçük bir uyarı.  Eğer
-sisteminizde sanallaştırmada kullanılan bir başka modül olan <code>kvm</code>
-etkinse onu kaldırmalısınız.  Aşağıdaki komut boş dönüyorsa bu adımı
-atlayın, aksi halde bu adımı atlayın:</p>
-
-<pre><code>   lsmod | grep kvm
-</code></pre>
-
-<p>Komut çıktısında <code>kvm</code>'yi görüyorsanız bunu kaldırmamız ve bu işlemi
-kalıcı hale getirmemiz gerekiyor.</p>
-
-<pre><code>   sudo sh -c 'printf "kvm_intel\nkvm" &gt;&gt;/etc/modprobe.d/blacklist.conf'
-   sudo update-initramfs -u
-   sudo modprobe -r kvm_intel
-   sudo modprobe -r kvm
-</code></pre>
-
-<p>VirtualBox'ı çalıştırarak talimatları izleyin.</p>
-
-<ul>
-<li><p>Program iletileri Türkçe çıkmıyorsa File → Preferences → Language
-menüsünden Türkçe'yi seçin.</p></li>
-<li><p>"Yeni"ye tıklayarak sanal makine oluşturma sihirbazını başlatın ve
-makinenize uygun bir isim verin.  (Ubuntu kurulumunda hangi konak
-adını kullanacaksınız bu ismi vermenizi tavsiye ederim).</p></li>
-<li><p>Öntanımlı ayarlarla ilerleyin.  Yani hiçbir adımda (girmeniz gereken
-bir isim vs hariç) tıklamak dışında bir işlem yapmayın.</p></li>
-</ul>
-
-<p>Bu şekilde henüz kurulum yapılmamış bir sanal donanım oluşturmuş
-oldunuz.  Şimdi bu sanal donanıma indirmiş olduğumuz imajı kuracağız.
-Bunun için tek yapılması gereken bu sanal donanımı seçerek çalıştırmak.
-İsmi seçin ve "Başlat"a tıklayın, "İlk Çalıştırma Sihirbazı" çalışıyor
-olmalı.</p>
-
-<ul>
-<li><p>"Yükleme Ortamını Seç" adımı geldiğinde size sunulan seçeneğin yanında
-görülen küçük ikona tıklayın ve karşınıza gelen "CD/DVD Kalıpları"
-sekmesinde "Ekle"ye tıklayarak önceki adımlarda indirmiş olduğunuz
-imajı sabit diskinizde bulun ve seçin.  (Eğer sanal bir Windows
-kurulumu yapmak isteseydik bu adımda Windows CD'sini CD sürücüye
-yerleştirip bunu göstermemiz yeterli olacaktı.)</p></li>
-<li><p>Bu noktadan sonra normal bir Ubuntu kurulumu yapabilirsiniz.
-Kurulumun sonlarında görev seçici aşamasına ulaştığınızda SSH sunucu
-ve (tercihen) LAMP sunucu seçeneklerini işaretlemeyi unutmayın.</p></li>
-</ul>
-
-<h2>Sanal Makine Ayarları</h2>
-
-<p>Artık sanal bir donanımınız ve onun üzerinde çalışan bir sisteminiz var.
-Aşağıdaki ayarları yapmanız halinde bu sistemi çalışma ortamınızda
-bulunan ağa bağlı gerçek bir makine gibi kullanabileceksiniz.</p>
-
-<ul>
-<li><p>Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka
-makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde
-ayarlayın.</p>
-
-<ul><li><p>"Aygıtlar" → "Network Adapters" → "Bağdaştırıcı 1" → "Şuraya
-eklendi" ayarını "Bridged Adapter" olarak değiştirin.</p></li>
-<li><p>Makineyi yeniden başlatın.</p></li>
-<li><p>Makine açıldığında IP adresini kontol edin.  Gerçek makinenizle
-sanal makine artık aynı ağ segmentinde olmalı.   Örneğin gerçek
-makinede ("Host OS") <code>ip addr</code> ile öğrenebileceğiniz IP adresi
-<code>192.168.1.XX</code> ise, sanal makinede ("Guest OS") aynı komutla
-öğreneceğiniz IP adresinin ilk üç segmenti aynı, yani <code>192.168.1.XX</code>
-olmalı.</p></li></ul></li>
-<li><p>Sanal makineye IP vererek değil de konak ismiyle erişmek için sanal
-makineye (ve şayet kurulu değilse gerçek makineye de) aşağıdaki
-kurulumu yapın:</p>
-
-<p>sudo apt-get install --no-install-recommends avahi-daemon</p>
-
-<p>Avahi sayesinde gerçek makineden (veya aynı ağdaki bir başka
-makineden) örneğin konak ismi <code>fuzuli</code> olan bir sanal makineye SSH ile
-ulaşmak için tek yapmanız gerekn konak adına <code>.local</code> alanını eklemek.
-Yani:</p>
-
-<p>ssh fuzuli.local</p></li>
-<li><p>Gerçek makinedeki bir dizini sanal makine ile paylaşabilmek için
-aşağıdaki ayarları yapın:</p>
-
-<ul><li><p>Sanal makineye gerekli paketleri kurun:</p>
-
-<p>sudo apt-get install --no-install-recommends virtualbox-ose-guest-utils virtualbox-ose-guest-dkms</p></li>
-<li><p>VirtualBox altında "Aygıtlar" → "Paylaşılan Dizinler"i tıklayarak
-yeni bir dizin ekleyin.  Örneğin gerçek makinede<code>~/ortak</code> isimli
-dizini <code>ortak</code> adıyla paylaştırın.</p></li>
-<li><p>Sanal makinede uygun bir bağlama noktası oluşturarak paylaşılan
-dizini bu noktaya bağlayın.  Bağlama noktası olarak kullanacağınız
-dizinin ismini gerçek makinenin konak ismiyle aynı yapın.  Örneğin
-gerçek makinenin ismi <code>baki</code> ise:</p>
-
-<p>sudo mkdir -p /srv/ortak/baki
-sudo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki</p></li>
-<li><p>Artık bu noktada paylaşılan dizine okuma/yazma yapabilmeniz lazım.
-Bu ayarın her açılışta etkin olması için sanal makinede
-/etc/rc.local dosyasına bir ekleme yapmalısınız (komutları dikkatli
-şekilde hiçbir karakteri atlamadan yazın).</p>
-
-<p>sudo sh -c 'echo "#!/bin/sh -e" >/etc/rc.local'
-sudo sh -c 'echo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki >>/etc/rc.local'
-sudo sh -c 'echo exit 0 >>/etc/rc.local'</p></li></ul></li>
-</ul>
-
-<p>Hepsi bu kadar.  Artık sanal makinenizi kullanabilirsiniz.  Son bir not.
-Daha konforlu çalışmak için bu makineyi VirtualBox'ın sunduğu pencerede
-çalıştırmak yerine bir konsol açıp SSH ile erişerek kullanmanızı tavsiye
-ederiz.</p>
-
-<ul>
-<li><p>Önce VirtualBox'ı çalıştırın:</p>
-
-<p>VirtualBox &amp;</p></li>
-<li><p>VirtualBox'ta sanal makineyi başlatın ve açılmasını bekleyin.</p></li>
-<li><p>Yeni bir konsol açın ve SSH ile sanal makineye giriş yapın:</p>
-
-<p>ssh fuzuli.local</p></li>
-</ul>
+ <html lang="tr"> <head> <meta content="text/html; charset=utf-8" http-equiv="Content-Type"> <title>19 Mayıs Üniversitesi Bilgisayar Mühendisliği Posta - sanal makine kurulumu - virtualbox</title> <style type="text/css"> 
+body, td{font-family:arial,sans-serif;font-size:80%} a:link, a:active, a:visited{color:#0000CC} img{border:0} pre { white-space: pre; white-space: -moz-pre-wrap; white-space: -o-pre-wrap; white-space: pre-wrap; word-wrap: break-word; width: 800px; overflow: auto;}
+</style> <script> 
+function Print(){document.body.offsetHeight;window.print()};
+</script> </head> <body onload="Print()"> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td width="143"> <img src="https://www.google.com/a/bil.omu.edu.tr/images/logo.gif" width="143" height="59" alt="19 Mayıs Üniversitesi Bilgisayar Mühendisliği Posta"> </td> <td align="right"> <font size="-1"><b> sefa yıldız &lt;sayz@bil.omu.edu.tr&gt; </b></td> </tr> </table> <hr> <font size="+2"> <b>sanal makine kurulumu - virtualbox</b></font><br> <font size="-1">45 ileti</font> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 26 Mayıs 2010 09:00 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"># VirtualBox Sanal Makine Kurulumu<br /> 
+<br /> 
+Makineniz yeterince güçlüyse sanal makine kurmanızı öneririm. &nbsp;Sanal<br /> 
+makineyi &quot;çalışılabilir&quot; preformansta kullanabilmeniz için asgari 2 GB,<br /> 
+çift çekirdekli (64 bit, yani amd64 mimarisi) bir makine öneririm. &nbsp;Bu<br /> 
+özelliklerden yoksun makineler de olur ama her şey yavaşlayacaktır.<br /> 
+<br /> 
+## Sanallaştırma neye yarar?<br /> 
+<br /> 
+- Linux vb yeni öğrenmekte olduğunuz işletim sistemlerini çekinmeden<br /> 
+&nbsp;kurcalamanıza yarar. &nbsp;Bu anlamda eğitsel değeri büyüktür.<br /> 
+<br /> 
+- Ana çalışma makinenize dokunmadan veya ikinci bir makine edinmeden<br /> 
+&nbsp;test ortamları oluşturmanıza yarar. &nbsp;Örneğin bu şekilde bir web sunucu<br /> 
+&nbsp;oluşturabilir ve bu sunucuya istediğiniz web yazılımlarını<br /> 
+&nbsp;kurabilirsiniz. &nbsp;Özellikle sistem yöneticileri ve web geliştiricileri<br /> 
+&nbsp;için bulunmaz bir fırsat.<br /> 
+<br /> 
+- Geliştirdiğiniz yazılımları farklı işletim sistemlerinde denemenize<br /> 
+&nbsp;yarar. &nbsp;Örneğin lisanslı bir Windows edinerek Ubuntu kurulu<br /> 
+&nbsp;makinenizde bir Windows sanal makinesi oluşturabilir ve geliştrdiğiniz<br /> 
+&nbsp;çapraz platform bir yazılımın testlerini yapabilirsiniz.<br /> 
+<br /> 
+- Ve bunun gibi daha pek çok yarar...<br /> 
+<br /> 
+## Sanal Makine Kurulum İmajının Seçimi<br /> 
+<br /> 
+Sanal makinede hangi işletim sistemi/dağıtımı kullanmak istiyorsanız<br /> 
+gerekli kurulum programı veya imajı edinmek zorundasınız. &nbsp;Unutmayın bu<br /> 
+işlemin normal bir kurulumdan farkı yok. &nbsp;Yani yasal olmayan bir şekilde<br /> 
+lisanssız yazılım kullanmayın.<br /> 
+<br /> 
+Bu dokümanda özellikle web yazılımları üzerinde çalışmak istediğinizi ve<br /> 
+bir sanal sunucu kurmak istediğinizi varsayacağım. &nbsp;Debian Lenny veya<br /> 
+Ubuntu Lucid Sunucu Edisyonu uygun bir seçim olabilir. &nbsp;64 bit Ubuntu<br /> 
+Lucid Sunucu Edisyonu üzerinden gidelim.<br /> 
+<br /> 
+- Ubuntu Lucid Sunucu Edisyonu kurmakta kullanacağınız imajı indirin:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;wget <a href="http://cdimage.ubuntu.com/ubuntu-server/daily/current/lucid-server-amd64.iso" target="_blank">http://cdimage.ubuntu.com/<wbr />ubuntu-server/daily/current/<wbr />lucid-server-amd64.iso</a><br /> 
+<br /> 
+Sanallaştırma terminolojisinde sanal makine olarak kuracağınız bu<br /> 
+sisteme &quot;Guest OS&quot; deniliyor.<br /> 
+<br /> 
+## Sanallaştırıcı (VirtualBox) Kurulumu<br /> 
+<br /> 
+64 bit mimaride (amd64) Debian veya Ubuntu gibi bir Debian türevi<br /> 
+kullandığınız varsayıyoruz. &nbsp;Gerçek makinede çalışan bu sisteme &quot;Host<br /> 
+OS&quot; deniliyor.<br /> 
+<br /> 
+VirtualBox kurulum sırasında derlenen özel bir kernel modülü kullanıyor.<br /> 
+Kurulum sırasında bir sorunla karşılaşmamanız öncelikle gerekli bir<br /> 
+takım paketleri kurun:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get install build-essential linux-headers-$(uname -r)<br /> 
+<br /> 
+VirtualBox için aşağıdaki adrese girerek uygun APT kaynağını ekleyin.<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://www.virtualbox.org/wiki/Linux_Downloads" target="_blank">http://www.virtualbox.org/<wbr />wiki/Linux_Downloads</a><br /> 
+<br /> 
+- Örneğin Debian Lenny kullanıyorsanız aşağıdaki satırı APT kaynaklarına<br /> 
+&nbsp;ekleyin.<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;deb <a href="http://download.virtualbox.org/virtualbox/debian" target="_blank">http://download.virtualbox.<wbr />org/virtualbox/debian</a> lenny non-free<br /> 
+<br /> 
+&nbsp;Bu işlemi şöyle yapmanızı öneririm (tırnaklara dikkat edin):<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'deb <a href="http://download.virtualbox.org/virtualbox/debian" target="_blank">http://download.virtualbox.<wbr />org/virtualbox/debian</a> lenny non-free &gt;/etc/apt/sources.list.d/<wbr />virtualbox.list'<br /> 
+<br /> 
+- Ubuntu Lucid kullanıyorsanız:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'deb <a href="http://download.virtualbox.org/virtualbox/debian" target="_blank">http://download.virtualbox.<wbr />org/virtualbox/debian</a> lucid non-free &gt;/etc/apt/sources.list.d/<wbr />virtualbox.list'<br /> 
+<br /> 
+- Depo anahtarını ekleyin:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;wget -q <a href="http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc" target="_blank">http://download.virtualbox.<wbr />org/virtualbox/debian/oracle_<wbr />vbox.asc</a> -O- | sudo apt-key add -<br /> 
+<br /> 
+- İndeksleri güncelleyin ve kurulumu yapın:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get update<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get install virtualbox-3.2<br /> 
+<br /> 
+- Kurulum sırasında VirtualBox bir çekirdek modülü derleyecektir. &nbsp;Bu<br /> 
+&nbsp;işlem biraz vakit alabilir.<br /> 
+<br /> 
+<br /> 
+## Sanal Makine Kurulumu<br /> 
+<br /> 
+VirtualBox'ı çalıştırarak önceki adımlarda indirmiş olduğumuz imajın<br /> 
+kurulumunu sanal ortamda yapacağız. &nbsp;Bu noktada küçük bir uyarı. &nbsp;Eğer<br /> 
+sisteminizde sanallaştırmada kullanılan bir başka modül olan `kvm`<br /> 
+etkinse onu kaldırmalısınız. &nbsp;Aşağıdaki komut boş dönüyorsa bu adımı<br /> 
+atlayın, aksi halde bu adımı atlayın:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;lsmod | grep kvm<br /> 
+<br /> 
+Komut çıktısında `kvm`'yi görüyorsanız bunu kaldırmamız ve bu işlemi<br /> 
+kalıcı hale getirmemiz gerekiyor.<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'printf &quot;kvm_intel\nkvm&quot; &gt;&gt;/etc/modprobe.d/blacklist.<wbr />conf'<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo update-initramfs -u<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo modprobe -r kvm_intel<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo modprobe -r kvm<br /> 
+<br /> 
+VirtualBox'ı çalıştırarak talimatları izleyin.<br /> 
+<br /> 
+- Program iletileri Türkçe çıkmıyorsa File → Preferences → Language<br /> 
+&nbsp;menüsünden Türkçe'yi seçin.<br /> 
+<br /> 
+- &quot;Yeni&quot;ye tıklayarak sanal makine oluşturma sihirbazını başlatın ve<br /> 
+&nbsp;makinenize uygun bir isim verin. &nbsp;(Ubuntu kurulumunda hangi konak<br /> 
+&nbsp;adını kullanacaksınız bu ismi vermenizi tavsiye ederim).<br /> 
+<br /> 
+- Öntanımlı ayarlarla ilerleyin. &nbsp;Yani hiçbir adımda (girmeniz gereken<br /> 
+&nbsp;bir isim vs hariç) tıklamak dışında bir işlem yapmayın.<br /> 
+<br /> 
+Bu şekilde henüz kurulum yapılmamış bir sanal donanım oluşturmuş<br /> 
+oldunuz. &nbsp;Şimdi bu sanal donanıma indirmiş olduğumuz imajı kuracağız.<br /> 
+Bunun için tek yapılması gereken bu sanal donanımı seçerek çalıştırmak.<br /> 
+İsmi seçin ve &quot;Başlat&quot;a tıklayın, &quot;İlk Çalıştırma Sihirbazı&quot; çalışıyor<br /> 
+olmalı.<br /> 
+<br /> 
+- &quot;Yükleme Ortamını Seç&quot; adımı geldiğinde size sunulan seçeneğin yanında<br /> 
+&nbsp;görülen küçük ikona tıklayın ve karşınıza gelen &quot;CD/DVD Kalıpları&quot;<br /> 
+&nbsp;sekmesinde &quot;Ekle&quot;ye tıklayarak önceki adımlarda indirmiş olduğunuz<br /> 
+&nbsp;imajı sabit diskinizde bulun ve seçin. &nbsp;(Eğer sanal bir Windows<br /> 
+&nbsp;kurulumu yapmak isteseydik bu adımda Windows CD'sini CD sürücüye<br /> 
+&nbsp;yerleştirip bunu göstermemiz yeterli olacaktı.)<br /> 
+<br /> 
+- Bu noktadan sonra normal bir Ubuntu kurulumu yapabilirsiniz.<br /> 
+&nbsp;Kurulumun sonlarında görev seçici aşamasına ulaştığınızda SSH sunucu<br /> 
+&nbsp;ve (tercihen) LAMP sunucu seçeneklerini işaretlemeyi unutmayın.<br /> 
+<br /> 
+<br /> 
+## Sanal Makine Ayarları<br /> 
+<br /> 
+Artık sanal bir donanımınız ve onun üzerinde çalışan bir sisteminiz var.<br /> 
+Aşağıdaki ayarları yapmanız halinde bu sistemi çalışma ortamınızda<br /> 
+bulunan ağa bağlı gerçek bir makine gibi kullanabileceksiniz.<br /> 
+<br /> 
+- Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka<br /> 
+&nbsp;makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde<br /> 
+&nbsp;ayarlayın.<br /> 
+<br /> 
+&nbsp;+ &quot;Aygıtlar&quot; → &quot;Network Adapters&quot; → &quot;Bağdaştırıcı 1&quot; → &quot;Şuraya<br /> 
+&nbsp; &nbsp;eklendi&quot; ayarını &quot;Bridged Adapter&quot; olarak değiştirin.<br /> 
+<br /> 
+&nbsp;+ Makineyi yeniden başlatın.<br /> 
+<br /> 
+&nbsp;+ Makine açıldığında IP adresini kontol edin. &nbsp;Gerçek makinenizle<br /> 
+&nbsp; &nbsp;sanal makine artık aynı ağ segmentinde olmalı. &nbsp; Örneğin gerçek<br /> 
+&nbsp; &nbsp;makinede (&quot;Host OS&quot;) `ip addr` ile öğrenebileceğiniz IP adresi<br /> 
+&nbsp; &nbsp;`192.168.1.XX` ise, sanal makinede (&quot;Guest OS&quot;) aynı komutla<br /> 
+&nbsp; &nbsp;öğreneceğiniz IP adresinin ilk üç segmenti aynı, yani `192.168.1.XX`<br /> 
+&nbsp; &nbsp;olmalı.<br /> 
+<br /> 
+- Sanal makineye IP vererek değil de konak ismiyle erişmek için sanal<br /> 
+&nbsp;makineye (ve şayet kurulu değilse gerçek makineye de) aşağıdaki<br /> 
+&nbsp;kurulumu yapın:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get install --no-install-recommends avahi-daemon<br /> 
+<br /> 
+&nbsp;Avahi sayesinde gerçek makineden (veya aynı ağdaki bir başka<br /> 
+&nbsp;makineden) örneğin konak ismi `fuzuli` olan bir sanal makineye SSH ile<br /> 
+&nbsp;ulaşmak için tek yapmanız gerekn konak adına `.local` alanını eklemek.<br /> 
+&nbsp;Yani:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;ssh fuzuli.local<br /> 
+<br /> 
+- Gerçek makinedeki bir dizini sanal makine ile paylaşabilmek için<br /> 
+&nbsp;aşağıdaki ayarları yapın:<br /> 
+<br /> 
+&nbsp;+ Sanal makineye gerekli paketleri kurun:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get install --no-install-recommends virtualbox-ose-guest-utils virtualbox-ose-guest-dkms<br /> 
+<br /> 
+&nbsp;+ VirtualBox altında &quot;Aygıtlar&quot; → &quot;Paylaşılan Dizinler&quot;i tıklayarak<br /> 
+&nbsp; &nbsp;yeni bir dizin ekleyin. &nbsp;Örneğin gerçek makinede`~/ortak` isimli<br /> 
+&nbsp; &nbsp;dizini `ortak` adıyla paylaştırın.<br /> 
+<br /> 
+&nbsp;+ Sanal makinede uygun bir bağlama noktası oluşturarak paylaşılan<br /> 
+&nbsp; &nbsp;dizini bu noktaya bağlayın. &nbsp;Bağlama noktası olarak kullanacağınız<br /> 
+&nbsp; &nbsp;dizinin ismini gerçek makinenin konak ismiyle aynı yapın. &nbsp;Örneğin<br /> 
+&nbsp; &nbsp;gerçek makinenin ismi `baki` ise:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo mkdir -p /srv/ortak/baki<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki<br /> 
+<br /> 
+&nbsp;+ Artık bu noktada paylaşılan dizine okuma/yazma yapabilmeniz lazım.<br /> 
+&nbsp; &nbsp;Bu ayarın her açılışta etkin olması için sanal makinede<br /> 
+&nbsp; &nbsp;/etc/rc.local dosyasına bir ekleme yapmalısınız (komutları dikkatli<br /> 
+&nbsp; &nbsp;şekilde hiçbir karakteri atlamadan yazın).<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'echo &quot;#!/bin/sh -e&quot; &gt;/etc/rc.local'<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'echo mount -t vboxsf -o uid=1000,gid=1000 ortak /srv/ortak/baki &gt;&gt;/etc/rc.local'<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo sh -c 'echo exit 0 &gt;&gt;/etc/rc.local'<br /> 
+<br /> 
+Hepsi bu kadar. &nbsp;Artık sanal makinenizi kullanabilirsiniz. &nbsp;Son bir not.<br /> 
+Daha konforlu çalışmak için bu makineyi VirtualBox'ın sunduğu pencerede<br /> 
+çalıştırmak yerine bir konsol açıp SSH ile erişerek kullanmanızı tavsiye<br /> 
+ederiz.<br /> 
+<br /> 
+- Önce VirtualBox'ı çalıştırın:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;VirtualBox &amp;<br /> 
+<br /> 
+- VirtualBox'ta sanal makineyi başlatın ve açılmasını bekleyin.<br /> 
+<br /> 
+- Yeni bir konsol açın ve SSH ile sanal makineye giriş yapın:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;ssh fuzuli.local<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 26 Mayıs 2010 10:44 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* recai oktaş [2010-05-26 09:00:39+0300]<br /> 
+<font color=#550055>&gt; Hepsi bu kadar. &nbsp;Artık sanal makinenizi kullanabilirsiniz. &nbsp;Son bir not.<br /> 
+&gt; Daha konforlu çalışmak için bu makineyi VirtualBox'ın sunduğu pencerede<br /> 
+&gt; çalıştırmak yerine bir konsol açıp SSH ile erişerek kullanmanızı tavsiye<br /> 
+&gt; ederiz.<br /> 
+&gt;<br /> 
+&gt; - Önce VirtualBox'ı çalıştırın:<br /> 
+&gt;<br /> 
+&gt; &nbsp; &nbsp; &nbsp; &nbsp; VirtualBox &amp;<br /> 
+&gt;<br /> 
+&gt; - VirtualBox'ta sanal makineyi başlatın ve açılmasını bekleyin.<br /> 
+&gt;<br /> 
+&gt; - Yeni bir konsol açın ve SSH ile sanal makineye giriş yapın:<br /> 
+&gt;<br /> 
+&gt; &nbsp; &nbsp; &nbsp; &nbsp; ssh fuzuli.local<br /> 
+<br /> 
+</font>VirtualBox paketiyle gelen çok zengin bazı araçlar var. &nbsp;bu &quot;SSH ile<br /> 
+birlikte kullanın&quot; tavsiyemize uygun bazı kullanım senaryoları:<br /> 
+<br /> 
+- sanal makinelerimizi listelemek istiyoruz<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;VBoxManage list vms<br /> 
+<br /> 
+- sanal makineyi GUI altında yönetmek istemiyoruz. &nbsp;amacımız küçük bir<br /> 
+&nbsp;pencerede `fuzuli` isimli sanal makineyi çalıştırmak<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;VBoxManage startvm fuzuli<br /> 
+<br /> 
+- pencere falan da istemiyoruz. &nbsp;tek amacımız sanal makineyi arka planda<br /> 
+&nbsp;çalıştırmak. &nbsp;makineye SSH ile komut satırından erişeceğiz (benim<br /> 
+&nbsp;favori senaryom)<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;VBoxHeadless -startvm fuzuli -vrdp off &amp;<br /> 
+<br /> 
+&nbsp;5-10 saniye bekleyin, makine açılsın...<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;ssh fuzuli<br /> 
+<br /> 
+&nbsp;dilerseniz bu iki komutu (gerekli beklemeleri vs ayarlayarak) bir<br /> 
+&nbsp;kabuk betiğine koyabilir, hatta panel'e ekleyerek &quot;tıkla ve makineye<br /> 
+&nbsp;gir&quot; yapabilirsiniz.<br /> 
+<br /> 
+&nbsp;hatta bu yöntemle Windows kurup makineye SSH yerine RDP ile<br /> 
+&nbsp;erişebilirsiniz.<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;# pencereyi aç<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;VBoxHeadless -startvm pencere -vrdp on &amp;<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;# rdesktop kurulu olmalı<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo apt-get install rdesktop<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;# içeri gir<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;rdesktop -a 16 -f localhost<br /> 
+<br /> 
+&nbsp;iki sistem arasında boot ederek gidip gelmek yerine tek bir ortamdan<br /> 
+&nbsp;hem linux hem windows, daha ne olsun :-)<br /> 
+<br /> 
+&nbsp;@gençler: bir kişi windows kurup bunu denesin.<br /> 
+<br /> 
+- daha başka pek çok ayrıntı var. &nbsp;GUI'yi pas geçerek herşeyi komut<br /> 
+&nbsp;satırından yapabiliyrsunuz. &nbsp;ayrıntılar için:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://dlc.sun.com.edgesuite.net/virtualbox/3.1.2/UserManual.pdf" target="_blank">http://dlc.sun.com.edgesuite.<wbr />net/virtualbox/3.1.2/<wbr />UserManual.pdf</a><br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;bk. 8'nci bölüm<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 26 Mayıs 2010 10:57 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>* recai oktaş [2010-05-26 09:00:39+0300]<br /> 
+</font><font color=#550055>&gt; # VirtualBox Sanal Makine Kurulumu<br /> 
+&gt;<br /> 
+&gt; Makineniz yeterince güçlüyse sanal makine kurmanızı öneririm. &nbsp;Sanal<br /> 
+&gt; makineyi &quot;çalışılabilir&quot; preformansta kullanabilmeniz için asgari 2 GB,<br /> 
+&gt; çift çekirdekli (64 bit, yani amd64 mimarisi) bir makine öneririm. &nbsp;Bu<br /> 
+&gt; özelliklerden yoksun makineler de olur ama her şey yavaşlayacaktır.<br /> 
+&gt;<br /> 
+&gt; ## Sanallaştırma neye yarar?<br /> 
+&gt;<br /> 
+&gt; - Linux vb yeni öğrenmekte olduğunuz işletim sistemlerini çekinmeden<br /> 
+&gt; &nbsp; kurcalamanıza yarar. &nbsp;Bu anlamda eğitsel değeri büyüktür.<br /> 
+&gt;<br /> 
+&gt; - Ana çalışma makinenize dokunmadan veya ikinci bir makine edinmeden<br /> 
+&gt; &nbsp; test ortamları oluşturmanıza yarar. &nbsp;Örneğin bu şekilde bir web sunucu<br /> 
+&gt; &nbsp; oluşturabilir ve bu sunucuya istediğiniz web yazılımlarını<br /> 
+&gt; &nbsp; kurabilirsiniz. &nbsp;Özellikle sistem yöneticileri ve web geliştiricileri<br /> 
+&gt; &nbsp; için bulunmaz bir fırsat.<br /> 
+<br /> 
+</font>bu şu açıdan önemli. &nbsp;ana çalışma makinemizi temiz tutmak zorundayız,<br /> 
+hem performans hem de hatasız çalışmak için gerekli. &nbsp;örneğin bir web<br /> 
+servisi açacağız. &nbsp;sanallaştırmanın yokluğunda, servisi oluşturmak ve<br /> 
+test etmek için ana makinemize web sunucu + php/java/ruby vs kıvır zıvır<br /> 
+pek çok yazılım kurmak durumunda kalacaktık. &nbsp;görev tamamlandığında<br /> 
+kurulan bu yazılımların pek bir anlamı kalmaz. &nbsp;ne yapmış olduk? &nbsp;bir<br /> 
+başka makinede çalışması gereken bir servisi ayağa kaldırmak için kendi<br /> 
+makinemizi kirletmiş olduk. &nbsp;sanallaştırma bu sorunları önlüyor.<br /> 
+<font color=#550055><br /> 
+&gt; - Geliştirdiğiniz yazılımları farklı işletim sistemlerinde denemenize<br /> 
+&gt; &nbsp; yarar. &nbsp;Örneğin lisanslı bir Windows edinerek Ubuntu kurulu<br /> 
+&gt; &nbsp; makinenizde bir Windows sanal makinesi oluşturabilir ve geliştrdiğiniz<br /> 
+&gt; &nbsp; çapraz platform bir yazılımın testlerini yapabilirsiniz.<br /> 
+&gt;<br /> 
+&gt; - Ve bunun gibi daha pek çok yarar...<br /> 
+<br /> 
+</font>bunları da atlamayayım...<br /> 
+<br /> 
+- sanal makineleri ihraç/ithal edebiliyorsunuz. &nbsp;örneğin sistem<br /> 
+&nbsp;yöneticisi grubu, yazılım grubu için sanal makineler oluşturuyor (8<br /> 
+&nbsp;GB'lık dosyalar yani) ve dosyaları yazılım grubuna veriyor. &nbsp;bu sayede<br /> 
+&nbsp;yazılım grubu yeni sistem kur, uğraş vs gibi sorunlarla boğuşmak<br /> 
+&nbsp;zorunda kalmıyor ve ayrıca geliştirme makineleri de temiz durumda<br /> 
+&nbsp;oluyor.<br /> 
+<br /> 
+- snapshot alabiliyorsunuz. &nbsp;yani makineyi belirli bir işlem sırasında<br /> 
+&nbsp;dondurup kaydedebiliyor ve kaldığınız yerden devam edebiliyorsunuz.<br /> 
+&nbsp;screencast vs almak için çok uygun.<br /> 
+<br /> 
+gerçek çalışma aleminde sanallaştırmanın en büyük yararı olan<br /> 
+&quot;konsolidasyon&quot;a ise şimdilik girmeyeyim. &nbsp;zamanı geldiğinde derslerde<br /> 
+anlatırız...<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 26 Mayıs 2010 11:27 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>* recai oktaş [2010-05-26 09:00:39+0300]<br /> 
+&gt; # VirtualBox Sanal Makine Kurulumu<br /> 
+<br /> 
+</font>bu dokümanı markdown ile yazmıştım, mario ile pdf'ye çevirdim. &nbsp;çıktı<br /> 
+almak isteyenler için:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://bil.omu.edu.tr/a/nasil-sanal-vbox.pdf" target="_blank">http://bil.omu.edu.tr/a/nasil-<wbr />sanal-vbox.pdf</a><br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emre can yılmaz &lt;can.yilmaz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 27 Mayıs 2010 10:59 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">elimde 10.04 ubuntu var 32 bit bendeki işlemci ise 64 bit herhangi bir sorun yaşatır mı ?<br><br><div class="gmail_quote">26 Mayıs 2010 11:27 tarihinde recai oktaş <span dir="ltr">&lt;<a href="mailto:roktas@bil.omu.edu.tr" target="_blank">roktas@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="border-left:1px solid rgb(204, 204, 204);margin:0pt 0pt 0pt 0.8ex;padding-left:1ex"><div>* recai oktaş [2010-05-26 09:00:39+0300]<br> 
+&gt; # VirtualBox Sanal Makine Kurulumu<br> 
+<br> 
+</div>bu dokümanı markdown ile yazmıştım, mario ile pdf&#39;ye çevirdim.  çıktı<br> 
+almak isteyenler için:<br> 
+<br> 
+       <a href="http://bil.omu.edu.tr/a/nasil-sanal-vbox.pdf" target="_blank">http://bil.omu.edu.tr/a/<WBR>nasil-sanal-vbox.pdf</a><br> 
+<font color="#888888"><br> 
+--<br> 
+roktas<br> 
+</font></blockquote></font></div><font color=#888888><br><br clear="all"><br>-- <br>ecylmz(Emre Can YILMAZ)<br><a href="http://www.ecylmz.com" target="_blank">www.ecylmz.com</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 27 Mayıs 2010 14:33 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* emre can yılmaz [2010-05-27 10:59:49+0300]<br /> 
+<font color=#550055>&gt; elimde 10.04 ubuntu var 32 bit bendeki işlemci ise 64 bit herhangi bir sorun<br /> 
+&gt; yaşatır mı ?<br /> 
+<br /> 
+</font>hayır sorun olmaz. &nbsp;bu sistemler zaten bu tür farklılıkları test etmek<br /> 
+için sık kullanılıyor.<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emre can yılmaz &lt;can.yilmaz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 28 Mayıs 2010 12:29 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055><br><div class="gmail_quote"><blockquote class="gmail_quote" style="border-left:1px solid rgb(204, 204, 204);margin:0pt 0pt 0pt 0.8ex;padding-left:1ex"> 
+- Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka<br> 
+ makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde<br> 
+ ayarlayın.<br> 
+<br> 
+ + &quot;Aygıtlar&quot; → &quot;Network Adapters&quot; → &quot;Bağdaştırıcı 1&quot; → &quot;Şuraya<br> 
+   eklendi&quot; ayarını &quot;Bridged Adapter&quot; olarak değiştirin.<br> 
+<br></blockquote></div><br><br></font>bu noktada  kaldım bir türlü bulamadım burayı . bu satırı atlasam nolur dedim . sanal makineden ssh la bağlanabiliyorum . <br> &quot;ssh 192.168.2.3&quot; diyerek . kendi makinemden denedim olmadı . Sanal makinenin ip&#39;si 10.0.2.15 . <br> 
+hocam başka bir yolu var mı bu ağ bağdaştrıcısının .<font color=#550055><br clear="all"><br>-- <br>ecylmz(Emre Can YILMAZ)<br><a href="http://www.ecylmz.com" target="_blank">www.ecylmz.com</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 28 Mayıs 2010 12:34 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* emre can yılmaz [2010-05-28 12:29:27+0300]<br /> 
+<font color=#550055>&gt; &gt; - Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka<br /> 
+&gt; &gt; &nbsp;makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde<br /> 
+&gt; &gt; &nbsp;ayarlayın.<br /> 
+&gt; &gt;<br /> 
+&gt; &gt; &nbsp;+ &quot;Aygıtlar&quot; → &quot;Network Adapters&quot; → &quot;Bağdaştırıcı 1&quot; → &quot;Şuraya<br /> 
+&gt; &gt; &nbsp; &nbsp;eklendi&quot; ayarını &quot;Bridged Adapter&quot; olarak değiştirin.<br /> 
+&gt; &gt;<br /> 
+&gt; &gt;<br /> 
+&gt;<br /> 
+&gt; bu noktada &nbsp;kaldım bir türlü bulamadım burayı . bu satırı atlasam nolur<br /> 
+&gt; dedim . sanal makineden ssh la bağlanabiliyorum .<br /> 
+&gt; &nbsp;&quot;ssh 192.168.2.3&quot; diyerek . kendi makinemden denedim olmadı . Sanal<br /> 
+&gt; makinenin ip'si 10.0.2.15 .<br /> 
+&gt; hocam başka bir yolu var mı bu ağ bağdaştrıcısının .<br /> 
+<br /> 
+</font>VirtualBox'ı çalıştır ve sanal makineyi seçip (çalıştırmadan):<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;Ayarlar → Ağ → &nbsp;&quot;Bağdaştırıcı 1&quot; → &quot;Şuraya eklendi&quot; → &quot;Bridged Adapter&quot;<br /> 
+<br /> 
+böyle olmuyor mu?<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emre can yılmaz &lt;can.yilmaz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 28 Mayıs 2010 12:39 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">tamamdır hocam ben o aygıtları ubuntu içinde arıyordum :-) :-) virtualbox içinde aramak aklıma gelmemişti :-)<br><br><div class="gmail_quote">28 Mayıs 2010 12:34 tarihinde recai oktaş <span dir="ltr">&lt;<a href="mailto:roktas@bil.omu.edu.tr" target="_blank">roktas@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="border-left:1px solid rgb(204, 204, 204);margin:0pt 0pt 0pt 0.8ex;padding-left:1ex">* emre can yılmaz [2010-05-28 12:29:27+0300]<br> 
+<div><div></div><div>&gt; &gt; - Sanal makineye gerçek makinenizden veya aynı ağdaki bir başka<br> 
+&gt; &gt;  makineden erişebilmek için ağ bağdaştırıcısını uygun şekilde<br> 
+&gt; &gt;  ayarlayın.<br> 
+&gt; &gt;<br> 
+&gt; &gt;  + &quot;Aygıtlar&quot; → &quot;Network Adapters&quot; → &quot;Bağdaştırıcı 1&quot; → &quot;Şuraya<br> 
+&gt; &gt;    eklendi&quot; ayarını &quot;Bridged Adapter&quot; olarak değiştirin.<br> 
+&gt; &gt;<br> 
+&gt; &gt;<br> 
+&gt;<br> 
+&gt; bu noktada  kaldım bir türlü bulamadım burayı . bu satırı atlasam nolur<br> 
+&gt; dedim . sanal makineden ssh la bağlanabiliyorum .<br> 
+&gt;  &quot;ssh 192.168.2.3&quot; diyerek . kendi makinemden denedim olmadı . Sanal<br> 
+&gt; makinenin ip&#39;si 10.0.2.15 .<br> 
+&gt; hocam başka bir yolu var mı bu ağ bağdaştrıcısının .<br> 
+<br> 
+</div></div>VirtualBox&#39;ı çalıştır ve sanal makineyi seçip (çalıştırmadan):<br> 
+<br> 
+       Ayarlar → Ağ →  &quot;Bağdaştırıcı 1&quot; → &quot;Şuraya eklendi&quot; → &quot;Bridged Adapter&quot;<br> 
+<br> 
+böyle olmuyor mu?<br> 
+<font color="#888888"><br> 
+--<br> 
+roktas<br> 
+</font></blockquote></font></div><br><br clear="all"><font color=#550055><br>-- <br>ecylmz(Emre Can YILMAZ)<br><a href="http://www.ecylmz.com" target="_blank">www.ecylmz.com</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 08 Haziran 2010 12:51 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>* recai oktaş [2010-05-26 09:00:39+0300]<br /> 
+</font><font color=#550055>&gt; # VirtualBox Sanal Makine Kurulumu<br /> 
+&gt;<br /> 
+&gt; Makineniz yeterince güçlüyse sanal makine kurmanızı öneririm. &nbsp;Sanal<br /> 
+&gt; makineyi &quot;çalışılabilir&quot; preformansta kullanabilmeniz için asgari 2 GB,<br /> 
+&gt; çift çekirdekli (64 bit, yani amd64 mimarisi) bir makine öneririm. &nbsp;Bu<br /> 
+&gt; özelliklerden yoksun makineler de olur ama her şey yavaşlayacaktır.<br /> 
+&gt;<br /> 
+&gt; ## Sanallaştırma neye yarar?<br /> 
+&gt;<br /> 
+&gt; - Linux vb yeni öğrenmekte olduğunuz işletim sistemlerini çekinmeden<br /> 
+&gt; &nbsp; kurcalamanıza yarar. &nbsp;Bu anlamda eğitsel değeri büyüktür.<br /> 
+&gt;<br /> 
+&gt; - Ana çalışma makinenize dokunmadan veya ikinci bir makine edinmeden<br /> 
+&gt; &nbsp; test ortamları oluşturmanıza yarar. &nbsp;Örneğin bu şekilde bir web sunucu<br /> 
+&gt; &nbsp; oluşturabilir ve bu sunucuya istediğiniz web yazılımlarını<br /> 
+&gt; &nbsp; kurabilirsiniz. &nbsp;Özellikle sistem yöneticileri ve web geliştiricileri<br /> 
+&gt; &nbsp; için bulunmaz bir fırsat.<br /> 
+&gt;<br /> 
+&gt; - Geliştirdiğiniz yazılımları farklı işletim sistemlerinde denemenize<br /> 
+&gt; &nbsp; yarar. &nbsp;Örneğin lisanslı bir Windows edinerek Ubuntu kurulu<br /> 
+&gt; &nbsp; makinenizde bir Windows sanal makinesi oluşturabilir ve geliştrdiğiniz<br /> 
+&gt; &nbsp; çapraz platform bir yazılımın testlerini yapabilirsiniz.<br /> 
+&gt;<br /> 
+&gt; - Ve bunun gibi daha pek çok yarar...<br /> 
+<br /> 
+</font>bir ekleme daha...<br /> 
+<br /> 
+günümüzde geliştirme yapmak için veya sadece merak ettiğinizden deneme<br /> 
+yapmak isteyeceğiniz pek çok sistem var. &nbsp;bunlardan en başta gelenleri<br /> 
+yeni nesil akıllı telefonlarda kullanılan işletim sistemleri. &nbsp;hemen<br /> 
+aklıma gelenler: android ve webos (palm pre)[1]. &nbsp;her iki sistemi de<br /> 
+sanallaştırma yaparak deneyebilirsiniz:<br /> 
+<br /> 
+<a href="http://www.itcamefromtheinternet.com/tech/archives/144-Before-you-buy,-try-Palm-web-OS-and-Android-in-Virtualbox-on-Ubuntu.html" target="_blank">http://www.<wbr />itcamefromtheinternet.com/<wbr />tech/archives/144-Before-you-<wbr />buy,-try-Palm-web-OS-and-<wbr />Android-in-Virtualbox-on-<wbr />Ubuntu.html</a><br /> 
+<font color=#550055><br /> 
+&gt; Hepsi bu kadar. &nbsp;Artık sanal makinenizi kullanabilirsiniz. &nbsp;Son bir not.<br /> 
+&gt; Daha konforlu çalışmak için bu makineyi VirtualBox'ın sunduğu pencerede<br /> 
+&gt; çalıştırmak yerine bir konsol açıp SSH ile erişerek kullanmanızı tavsiye<br /> 
+&gt; ederiz.<br /> 
+<br /> 
+</font>aklın yolu bir. &nbsp;bakın bu &quot;ssh kullanın&quot; tavsiyesi webos dokümanlarında<br /> 
+da geçiyor.<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;[bk. &quot;VirtualBox tips for Windows users&quot; kutusu]<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://www.webos-internals.org/wiki/WebOS_Internals_PDK" target="_blank">http://www.webos-internals.<wbr />org/wiki/WebOS_Internals_PDK</a><br /> 
+<br /> 
+[1] listede iphone yok. &nbsp;çünkü olanca ihtişamına rağmen aşırı kapalı bir<br /> 
+&nbsp; &nbsp;sistem bu.<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 08:51 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">sanal mkaina kurulumu sırasında öncelikli yaptığım işlemleri sıralayayım<br><br>öncelikle VirtualBox 3,2  kurulumundan sonra bir sanal makina kurulumu için yeni dedim ve isime &#39;sanal&#39; girdim<br>altındaki sistem tercihlerinden linux&gt;ubuntu yu seçtim geri kalan herşey default kalmak üzere ileri ileri ...<br> 
+<br>arkasından image dosyasını seçtim<br><br><a href="http://www.ubuntu.com/server/get-ubuntu/download" target="_blank">http://www.ubuntu.com/server/<WBR>get-ubuntu/download</a>  &#39;dan  indirdiğim ubuntu-10.04-server-amd64  .............<br> 
+(kullanıcı dizinime koydum ve ordan seçiyorum)<br><br>arkasından gelen küçük konsol ekranında gelen ubuntu kurulum şemasından ubuntu server kurulumunun üzeirndeyken f4 kiplerinden &#39;asgari bir sanal makina kur&#39; u seçtim ve karşıma yine aynı konsol ekranında <br> 
+<br>This Kernel requises an X86-64 CPU, but olny detected an i686 CPU.<br>Unable to boot - please use a kernel appropriate for your CPU.<br>_<br><br><br>şeklindeki yazı gelir ve interaktif değil<br><br>sonra ağ ayarlarından bağdaştırıcı1 sekmesindeki şuraya eklendi kısmını Bridged Adapder &#39;i seçiyorum altta eth0 çıkıyor hemen ve ip durumu ise şöyle;<br> 
+<br>emin@emin:~$ ip addr<br>1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN <br>    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00<br>    inet <a href="http://127.0.0.1/8" target="_blank">127.0.0.1/8</a> scope host lo<br> 
+    inet6 ::1/128 scope host <br>       valid_lft forever preferred_lft forever<br>2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_<WBR>UP&gt; mtu 1500 qdisc pfifo_fast state UNKNOWN qlen 1000<br>    link/ether 00:26:9e:08:f8:29 brd ff:ff:ff:ff:ff:ff<br> 
+    inet <a href="http://192.168.1.4/24" target="_blank">192.168.1.4/24</a> brd 192.168.1.255 scope global eth0<br>    inet6 fe80::226:9eff:fe08:f829/64 scope link <br>       valid_lft forever preferred_lft forever<br>3: wlan0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN qlen 1000<br> 
+    link/ether 00:26:5e:75:ec:7a brd ff:ff:ff:ff:ff:ff<br>5: vboxnet0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN qlen 1000<br>    link/ether 0a:00:27:00:00:00 brd ff:ff:ff:ff:ff:ff<br>emin@emin:~$ <br><br> 
+<br>bu denemeleri 7-8 kez yaptım bakmadığım yer kalmadı ama nerde hata yaptığımı anlayamadım <br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 09:27 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+<font color=#550055>&gt; sanal mkaina kurulumu sırasında öncelikli yaptığım işlemleri sıralayayım<br /> 
+&gt;<br /> 
+&gt; öncelikle VirtualBox 3,2&nbsp; kurulumundan sonra bir sanal makina kurulumu için<br /> 
+&gt; yeni dedim ve isime 'sanal' girdim<br /> 
+&gt; altındaki sistem tercihlerinden linux&gt;ubuntu yu seçtim geri kalan herşey<br /> 
+&gt; default kalmak üzere ileri ileri ...<br /> 
+&gt;<br /> 
+&gt; arkasından image dosyasını seçtim<br /> 
+&gt;<br /> 
+&gt; <a href="http://www.ubuntu.com/server/get-ubuntu/download" target="_blank">http://www.ubuntu.com/server/<wbr />get-ubuntu/download</a>&nbsp; 'dan&nbsp; indirdiğim<br /> 
+&gt; ubuntu-10.04-server-amd64&nbsp; .............<br /> 
+<br /> 
+</font>64 bitlik sürümü kurmak için sistem tercihlerinde ubuntu seçeneğinin altındaki<br /> 
+ubuntu (64 bit)'i seçmen gerekiyor.<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 11:14 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sigara paketine yazılan notlar &lt;sipa@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055><br> 
+<div class="gmail_quote"><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex">64 bitlik sürümü kurmak için sistem tercihlerinde ubuntu seçeneğinin altındaki<br> 
+ubuntu (64 bit)&#39;i seçmen gerekiyor.<br> 
+<br></blockquote></div><br></font>hocam yakalayamadım o kısmı tam olarak hangi kısımda<br><br>bir de sadece o kısımda mı sorun görünüyor??<br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 11:31 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">[konuyu bilen'e taşıyorum, uygun yer orası]<br /> 
+<font color=#550055><br /> 
+2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+</font><font color=#550055>&gt; sanal mkaina kurulumu sırasında öncelikli yaptığım işlemleri sıralayayım<br /> 
+&gt;<br /> 
+&gt; öncelikle VirtualBox 3,2&nbsp; kurulumundan sonra bir sanal makina kurulumu için<br /> 
+&gt; yeni dedim ve isime 'sanal' girdim<br /> 
+&gt; altındaki sistem tercihlerinden linux&gt;ubuntu yu seçtim geri kalan herşey<br /> 
+&gt; default kalmak üzere ileri ileri ...<br /> 
+&gt;<br /> 
+&gt; arkasından image dosyasını seçtim<br /> 
+&gt;<br /> 
+&gt; <a href="http://www.ubuntu.com/server/get-ubuntu/download" target="_blank">http://www.ubuntu.com/server/<wbr />get-ubuntu/download</a>&nbsp; 'dan&nbsp; indirdiğim<br /> 
+&gt; ubuntu-10.04-server-amd64&nbsp; .............<br /> 
+&gt; (kullanıcı dizinime koydum ve ordan seçiyorum)<br /> 
+<br /> 
+</font>64 bitlik sürümü kurmak istiyorsan, İşletim sistemi seçeneklerinden<br /> 
+linux -&gt; ubuntu (64 bit)'i seçmen gerekiyor.<br /> 
+<font color=#550055><br /> 
+&gt;<br /> 
+&gt; arkasından gelen küçük konsol ekranında gelen ubuntu kurulum şemasından<br /> 
+&gt; ubuntu server kurulumunun üzeirndeyken f4 kiplerinden 'asgari bir sanal<br /> 
+&gt; makina kur' u seçtim ve karşıma yine aynı konsol ekranında<br /> 
+&gt;<br /> 
+&gt; This Kernel requises an X86-64 CPU, but olny detected an i686 CPU.<br /> 
+&gt; Unable to boot - please use a kernel appropriate for your CPU.<br /> 
+<br /> 
+</font>sadece &quot;ubuntu&quot; seçtiğin için sanal makinenin işlemcisi 32bit oldu.<br /> 
+&quot;ubuntu (64 bit)&quot; seçince bu hatayı almayacaksın.<br /> 
+<font color=#550055><br /> 
+&gt; sonra ağ ayarlarından bağdaştırıcı1 sekmesindeki şuraya eklendi kısmını<br /> 
+&gt; Bridged Adapder 'i seçiyorum altta eth0 çıkıyor hemen ve ip durumu ise<br /> 
+&gt; şöyle;<br /> 
+&gt;<br /> 
+&gt; emin@emin:~$ ip addr<br /> 
+&gt; 1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 16436 qdisc noqueue state UNKNOWN<br /> 
+&gt; &nbsp;&nbsp;&nbsp; link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00<br /> 
+&gt; &nbsp;&nbsp;&nbsp; inet <a href="http://127.0.0.1/8" target="_blank">127.0.0.1/8</a> scope host lo<br /> 
+&gt; &nbsp;&nbsp;&nbsp; inet6 ::1/128 scope host<br /> 
+&gt; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; valid_lft forever preferred_lft forever<br /> 
+&gt; 2: eth0: &lt;BROADCAST,MULTICAST,UP,LOWER_<wbr />UP&gt; mtu 1500 qdisc pfifo_fast state<br /> 
+&gt; UNKNOWN qlen 1000<br /> 
+&gt; &nbsp;&nbsp;&nbsp; link/ether 00:26:9e:08:f8:29 brd ff:ff:ff:ff:ff:ff<br /> 
+&gt; &nbsp;&nbsp;&nbsp; inet <a href="http://192.168.1.4/24" target="_blank">192.168.1.4/24</a> brd 192.168.1.255 scope global eth0<br /> 
+&gt; &nbsp;&nbsp;&nbsp; inet6 fe80::226:9eff:fe08:f829/64 scope link<br /> 
+&gt; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; valid_lft forever preferred_lft forever<br /> 
+&gt; 3: wlan0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN qlen 1000<br /> 
+&gt; &nbsp;&nbsp;&nbsp; link/ether 00:26:5e:75:ec:7a brd ff:ff:ff:ff:ff:ff<br /> 
+&gt; 5: vboxnet0: &lt;BROADCAST,MULTICAST&gt; mtu 1500 qdisc noop state DOWN qlen 1000<br /> 
+&gt; &nbsp;&nbsp;&nbsp; link/ether 0a:00:27:00:00:00 brd ff:ff:ff:ff:ff:ff<br /> 
+&gt; emin@emin:~$<br /> 
+<br /> 
+</font>sanal makine çalışmadığına göre, bu komutu gerçek makinede<br /> 
+kullanıyorsun sanırım. burdan bir bilgi elde edemezsin.<br /> 
+<br /> 
+64 bit seçimine dikkat ederek kurduğun zaman, sanal makineyi açıp,<br /> 
+ordan bakmalısın. Bridged adapter seçtiğine göre 192.168.1.* ağından<br /> 
+bir IP almış olmalı.<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 11:50 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><br> 
+<div class="gmail_quote"><div class="gmail_quote"><font color=#550055><div><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex"><div> 
+<br> 
+</div>64 bitlik sürümü kurmak istiyorsan, İşletim sistemi
+seçeneklerinden<br> 
+linux -&gt; ubuntu (64 bit)&#39;i seçmen gerekiyor.<br></blockquote></div></font><div><br>sıkıntı
+bu kısımda galiba hocam bu işlemler ilk VirtualBox a girdiktyen sonra
+yeni deyip başladığımız kısımda değil mi işte orada linux seçtiğim zaman
+otomatik kendi sistemimi tanıyor (sanırım) ubuntu seçeneğini sunuyor
+ancak diğer seçeneklere baktığımda da durum aynı yani sadece ubuntu var
+aksi yok!<br> 
+<br> 
+bir de other linux var ?<br> 
+<br> 
+<br><br></div><font color=#550055><div><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex"><div><br> 
+</div>sanal makine çalışmadığına göre, bu komutu gerçek makinede<br> 
+kullanıyorsun sanırım. burdan bir bilgi elde edemezsin.<br> 
+<br> 
+64 bit seçimine dikkat ederek kurduğun zaman, sanal makineyi açıp,<br> 
+ordan bakmalısın. Bridged adapter seçtiğine göre 192.168.1.* ağından<br> 
+bir IP almış olmalı.<br></blockquote></div></font><div><br><br>bu kısmı anladım<br></div></div><br> 
+</div><br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 12:23 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+&gt;<br /> 
+&gt;&gt;<br /> 
+</font><font color=#550055>&gt;&gt; 64 bitlik sürümü kurmak istiyorsan, İşletim sistemi seçeneklerinden<br /> 
+&gt;&gt; linux -&gt; ubuntu (64 bit)'i seçmen gerekiyor.<br /> 
+&gt;<br /> 
+&gt; sıkıntı bu kısımda galiba hocam bu işlemler ilk VirtualBox a girdiktyen<br /> 
+&gt; sonra yeni deyip başladığımız kısımda değil mi işte orada linux seçtiğim<br /> 
+&gt; zaman otomatik kendi sistemimi tanıyor (sanırım) ubuntu seçeneğini sunuyor<br /> 
+<br /> 
+</font>Birşey tanıdığı yok, kafadan atıyor o :)<br /> 
+<br /> 
+Otomatik olarak ubuntu geliyor ama, ona tıkladığın zaman açılan menüde<br /> 
+debian, ubuntu ve başka bir çok seçenek daha olması lazım.<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 12:37 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">linux 2.2<br>linux 2.4<br>linux 2.6<br>Arch Linux<br>Debian<br>openSUSE<br>fedora<br>gentoo<br>mandriva<br>redhat<br>turbolinux<br>ubuntu<br>xandos<br>oracle<br>otherlinux<br><br><br>seçenekler bunlar harfi harfine sırası sırasına<br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 13:14 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+</font><font color=#550055>&gt; linux 2.2<br /> 
+&gt; linux 2.4<br /> 
+&gt; linux 2.6<br /> 
+&gt; Arch Linux<br /> 
+&gt; Debian<br /> 
+&gt; openSUSE<br /> 
+&gt; fedora<br /> 
+&gt; gentoo<br /> 
+&gt; mandriva<br /> 
+&gt; redhat<br /> 
+&gt; turbolinux<br /> 
+&gt; ubuntu<br /> 
+&gt; xandos<br /> 
+&gt; oracle<br /> 
+&gt; otherlinux<br /> 
+&gt;<br /> 
+&gt;<br /> 
+&gt; seçenekler bunlar harfi harfine sırası sırasına<br /> 
+<br /> 
+</font>Gerçek makina 64 bit, değil mi?<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 13:18 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055><div><br> 
+</div><div class="gmail_quote"><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex">Gerçek makina 64 bit, değil mi?<br></blockquote></div><br></font>kesinlikle<br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 13:32 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+&gt;<br /> 
+</font><font color=#550055>&gt;&gt; Gerçek makina 64 bit, değil mi?<br /> 
+&gt;<br /> 
+&gt; kesinlikle<br /> 
+<br /> 
+</font>virtualbox'ı nasıl kurdun?<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 13:37 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><br><br><div class="gmail_quote">06 Temmuz 2010 13:32 tarihinde selçuk mıynat <span dir="ltr">&lt;<a href="mailto:selcuk.miynat@bil.omu.edu.tr" target="_blank">selcuk.miynat@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex"> 
+<div>2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr" target="_blank">emin.eker@bil.omu.edu.tr</a>&gt;:<br> 
+&gt;<br> 
+</div><div>&gt;&gt; Gerçek makina 64 bit, değil mi?<br> 
+&gt;<br> 
+&gt; kesinlikle<br> 
+<br> 
+</div>virtualbox&#39;ı nasıl kurdun?<br> 
+<br></blockquote></font><div><br><br>roktas &#39;ın verdiği link üzerinden<font color=#550055><br><a href="http://www.virtualbox.org/wiki/Linux_Downloads" target="_blank">http://www.virtualbox.org/<WBR>wiki/Linux_Downloads</a><br></font>ilk sıra amd64<br></div></div><br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> selçuk mıynat &lt;selcuk.miynat@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Temmuz 2010 13:56 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055>2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+&gt;<br /> 
+&gt;<br /> 
+&gt; 06 Temmuz 2010 13:32 tarihinde selçuk mıynat &lt;<a href="mailto:selcuk.miynat@bil.omu.edu.tr">selcuk.miynat@bil.omu.edu.tr</a>&gt;<br /> 
+&gt; yazdı:<br /> 
+&gt;&gt;<br /> 
+&gt;&gt; 2010/7/6 emin eker &lt;<a href="mailto:emin.eker@bil.omu.edu.tr">emin.eker@bil.omu.edu.tr</a>&gt;:<br /> 
+&gt;&gt; &gt;<br /> 
+&gt;&gt; &gt;&gt; Gerçek makina 64 bit, değil mi?<br /> 
+&gt;&gt; &gt;<br /> 
+&gt;&gt; &gt; kesinlikle<br /> 
+&gt;&gt;<br /> 
+&gt;&gt; virtualbox'ı nasıl kurdun?<br /> 
+&gt;&gt;<br /> 
+&gt;<br /> 
+&gt;<br /> 
+&gt; roktas 'ın verdiği link üzerinden<br /> 
+&gt; <a href="http://www.virtualbox.org/wiki/Linux_Downloads" target="_blank">http://www.virtualbox.org/<wbr />wiki/Linux_Downloads</a><br /> 
+&gt; ilk sıra amd64<br /> 
+<br /> 
+</font>Alt tarafta &quot;Debian-based Linux distributions&quot; başlığında ubuntu için<br /> 
+apt-get ile nasıl kurulum yapılacağı anlatılıyor. O şekilde kurmaya<br /> 
+çalış.<br /> 
+<br /> 
+--<br /> 
+<font color=#888888>Selçuk<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 07 Temmuz 2010 13:37 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">durum aynı<br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 12 Temmuz 2010 14:38 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emin eker &lt;emin.eker@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">ben ilk başta ssh ile bağlanamadım sanal makinaya<div>sonra her iki(normal - sanal) makinaya da openssh (komut : sudo aptitude openssh-server)</div><div>kurdum şimdi</div><div>&quot;$ : ssh normal.local&quot; ile sanal makinadan bağlanıyorum</div> 
+<div>ancak normal makinadan</div><div>&quot;$ : ssh sanal.local&quot; ile normal makinadan bağlanamıyorum</div><div>şifreyi girince:</div><div><br></div><div>sefay@sefalap.local&#39;s password:</div><div>Permission denied (publickey,password).</div> 
+<div>hatasını veriyor<br><div><br><br clear="all"><br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br></i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div> 
+<div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div><br> 
+</div></div> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 12 Temmuz 2010 15:05 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* sefa yıldız [2010-07-12 14:38:17+0300]<br /> 
+<font color=#550055>&gt; ben ilk başta ssh ile bağlanamadım sanal makinaya<br /> 
+&gt; sonra her iki(normal - sanal) makinaya da openssh (komut : sudo aptitude<br /> 
+&gt; openssh-server)<br /> 
+&gt; kurdum şimdi<br /> 
+&gt; &quot;$ : ssh normal.local&quot; ile sanal makinadan bağlanıyorum<br /> 
+&gt; ancak normal makinadan<br /> 
+&gt; &quot;$ : ssh sanal.local&quot; ile normal makinadan bağlanamıyorum<br /> 
+&gt; şifreyi girince:<br /> 
+&gt;<br /> 
+&gt; sefay@sefalap.local's password:<br /> 
+&gt; Permission denied (publickey,password).<br /> 
+&gt; hatasını veriyor<br /> 
+<br /> 
+</font>hatırlarsan bu SSH bağlantıları için daha önce bir liste veröiştim, onu<br /> 
+kontrol et. &nbsp;ayrıca (bu sorun için) şu komutla bağlantı sırasında<br /> 
+sunucuda ne döndüğüne bak:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;sudo tail /var/log/auth.log<br /> 
+<br /> 
+bunu bir konsolda çalıştır beklesin, diğer konsolda erişi yap ve buraya<br /> 
+ne basıldığına bak.<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 12 Temmuz 2010 15:27 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><span style="color:rgb(0, 0, 153)">Bu sanal makina daki çıktısı:</span><br>sefa@sefalap:~$ ssh -v abanoz.local<br>OpenSSH_5.3p1 Debian-3ubuntu4, OpenSSL 0.9.8k 25 Mar 2009<br>debug1: Reading configuration data /etc/ssh/ssh_config<br> 
+debug1: Applying options for *<br>debug1: Connecting to abanoz.local [192.168.121.34] port 22.<br>debug1: Connection established.<br>debug1: identity file /home/sefa/.ssh/identity type -1<br>debug1: identity file /home/sefa/.ssh/id_rsa type 1<br> 
+debug1: Checking blacklist file /usr/share/ssh/blacklist.RSA-<WBR>2048<br>debug1: Checking blacklist file /etc/ssh/blacklist.RSA-2048<br>debug1: identity file /home/sefa/.ssh/id_dsa type -1<br>debug1: Remote protocol version 2.0, remote software version OpenSSH_5.3p1 Debian-3ubuntu4<br> 
+debug1: match: OpenSSH_5.3p1 Debian-3ubuntu4 pat OpenSSH*<br>debug1: Enabling compatibility mode for protocol 2.0<br>debug1: Local version string SSH-2.0-OpenSSH_5.3p1 Debian-3ubuntu4<br>debug1: SSH2_MSG_KEXINIT sent<br> 
+debug1: SSH2_MSG_KEXINIT received<br> 
+debug1: kex: server-&gt;client aes128-ctr hmac-md5 none<br>debug1: kex: client-&gt;server aes128-ctr hmac-md5 none<br>debug1: SSH2_MSG_KEX_DH_GEX_REQUEST(<WBR>1024&lt;1024&lt;8192) sent<br>debug1: expecting SSH2_MSG_KEX_DH_GEX_GROUP<br> 
+debug1: SSH2_MSG_KEX_DH_GEX_INIT sent<br>debug1: expecting SSH2_MSG_KEX_DH_GEX_REPLY<br>debug1: Host &#39;abanoz.local&#39; is known and matches the RSA host key.<br>debug1: Found key in /home/sefa/.ssh/known_hosts:3<br> 
+debug1: ssh_rsa_verify: signature correct<br> 
+debug1: SSH2_MSG_NEWKEYS sent<br>debug1: expecting SSH2_MSG_NEWKEYS<br>debug1: SSH2_MSG_NEWKEYS received<br>debug1: SSH2_MSG_SERVICE_REQUEST sent<br>debug1: SSH2_MSG_SERVICE_ACCEPT received<br>debug1: Authentications that can continue: publickey,password<br> 
+debug1: Next authentication method: publickey<br>debug1: Offering public key: /home/sefa/.ssh/id_rsa<br>debug1: Authentications that can continue: publickey,password<br>debug1: Trying private key: /home/sefa/.ssh/identity<br> 
+debug1: Trying private key: /home/sefa/.ssh/id_dsa<br>debug1: Next authentication method: password<br>sefa@abanoz.local&#39;s password: <br>debug1: Authentication succeeded (password).<br>debug1: channel 0: new [client-session]<br> 
+debug1: Requesting <a href="mailto:no-more-sessions@openssh.com" target="_blank">no-more-sessions@openssh.com</a><br>debug1: Entering interactive session.<br>debug1: Sending environment.<br>debug1: Sending env LANG = tr_TR.utf8<br> 
+Linux abanoz 2.6.32-23-generic #37-Ubuntu SMP Fri Jun 11 08:03:28 UTC 2010 x86_64 GNU/Linux<br> 
+Ubuntu 10.04 LTS<br><br>Welcome to Ubuntu!<br> * Documentation:  <a href="https://help.ubuntu.com/" target="_blank">https://help.ubuntu.com/</a><br><br>Last login: Mon Jul 12 14:30:13 2010 from sefalap.local<br>To run a command as administrator (user &quot;root&quot;), use &quot;sudo &lt;command&gt;&quot;.<br> 
+See &quot;man sudo_root&quot; for details.<br><br>You will not be elected to public office this year.<br>sefa@abanoz:~$<br><br><div><font color="#FF0000">Bu da kendi makinamdan aldığım çıktı:</font></div> 
+<div><font color="#000099"><div><font color="#000000">sefay@abanoz:~$ ssh -v sefa@sefalap.local</font></div><div><font color="#000000">OpenSSH_5.3p1 Debian-3ubuntu4, OpenSSL 0.9.8k 25 Mar 2009</font></div> 
+<div><font color="#000000">debug1: Reading configuration data /etc/ssh/ssh_config</font></div><div><font color="#000000">debug1: Applying options for *</font></div><div><font color="#000000">debug1: Connecting to sefalap.local [192.168.121.71] port 22.</font></div> 
+<div><font color="#000000">debug1: Connection established.</font></div><div><font color="#000000">debug1: identity file /home/sefay/.ssh/identity type -1</font></div><div> 
+<font color="#000000">debug1: identity file /home/sefay/.ssh/id_rsa type 1</font></div><div><font color="#000000">debug1: Checking blacklist file /usr/share/ssh/blacklist.RSA-<WBR>2048</font></div> 
+<div><font color="#000000">debug1: Checking blacklist file /etc/ssh/blacklist.RSA-2048</font></div><div><font color="#000000">debug1: identity file /home/sefay/.ssh/id_dsa type -1</font></div> 
+<div><font color="#000000">debug1: Remote protocol version 2.0, remote software version OpenSSH_5.3p1 Debian-3ubuntu4</font></div><div><font color="#000000">debug1: match: OpenSSH_5.3p1 Debian-3ubuntu4 pat OpenSSH*</font></div> 
+<div><font color="#000000">debug1: Enabling compatibility mode for protocol 2.0</font></div><div><font color="#000000">debug1: Local version string SSH-2.0-OpenSSH_5.3p1 Debian-3ubuntu4</font></div> 
+<div><font color="#000000">debug1: SSH2_MSG_KEXINIT sent</font></div><div><font color="#000000">debug1: SSH2_MSG_KEXINIT received</font></div><div><font color="#000000">debug1: kex: server-&gt;client aes128-ctr hmac-md5 none</font></div> 
+<div><font color="#000000">debug1: kex: client-&gt;server aes128-ctr hmac-md5 none</font></div><div><font color="#000000">debug1: SSH2_MSG_KEX_DH_GEX_REQUEST(<WBR>1024&lt;1024&lt;8192) sent</font></div> 
+<div><font color="#000000">debug1: expecting SSH2_MSG_KEX_DH_GEX_GROUP</font></div><div><font color="#000000">debug1: SSH2_MSG_KEX_DH_GEX_INIT sent</font></div><div><font color="#000000">debug1: expecting SSH2_MSG_KEX_DH_GEX_REPLY</font></div> 
+<div><font color="#000000">debug1: Host &#39;sefalap.local&#39; is known and matches the RSA host key.</font></div><div><font color="#000000">debug1: Found key in /home/sefay/.ssh/known_hosts:3</font></div> 
+<div><font color="#000000">debug1: ssh_rsa_verify: signature correct</font></div><div><font color="#000000">debug1: SSH2_MSG_NEWKEYS sent</font></div><div><font color="#000000">debug1: expecting SSH2_MSG_NEWKEYS</font></div> 
+<div><font color="#000000">debug1: SSH2_MSG_NEWKEYS received</font></div><div><font color="#000000">debug1: SSH2_MSG_SERVICE_REQUEST sent</font></div><div><font color="#000000">debug1: SSH2_MSG_SERVICE_ACCEPT received</font></div> 
+<div><font color="#000000">debug1: Authentications that can continue: publickey,password</font></div><div><font color="#000000">debug1: Next authentication method: publickey</font></div> 
+<div><font color="#000000">debug1: Offering public key: /home/sefay/.ssh/id_rsa</font></div><div><font color="#000000">debug1: Authentications that can continue: publickey,password</font></div> 
+<div><font color="#000000">debug1: Trying private key: /home/sefay/.ssh/identity</font></div><div><font color="#000000">debug1: Trying private key: /home/sefay/.ssh/id_dsa</font></div> 
+<div><font color="#000000">debug1: Next authentication method: password</font></div><div><font color="#000000">sefa@sefalap.local&#39;s password: </font></div><div><font color="#000000">debug1: Authentication succeeded (password).</font></div> 
+<div><font color="#000000">debug1: channel 0: new [client-session]</font></div><div><font color="#000000">debug1: Requesting <a href="mailto:no-more-sessions@openssh.com" target="_blank">no-more-sessions@openssh.com</a></font></div> 
+<div><font color="#000000">debug1: Entering interactive session.</font></div><div><font color="#000000">debug1: Sending environment.</font></div><div><font color="#000000">debug1: Sending env LANG = tr_TR.UTF-8</font></div> 
+<div><font color="#000000">Linux sefalap 2.6.32-23-generic #37-Ubuntu SMP Fri Jun 11 07:54:58 UTC 2010 i686 GNU/Linux</font></div><div><font color="#000000">Ubuntu 10.04 LTS</font></div> 
+<div><font color="#000000"><br></font></div><div><font color="#000000">Welcome to Ubuntu!</font></div><div><font color="#000000"> * Documentation:  <a href="https://help.ubuntu.com/" target="_blank">https://help.ubuntu.com/</a></font></div> 
+<div><font color="#000000"><br></font></div><div><font color="#000000">16 packages can be updated.</font></div><div><font color="#000000">4 updates are security updates.</font></div> 
+<div><font color="#000000"><br></font></div><div><font color="#000000">Last login: Mon Jul 12 15:13:28 2010 from 192.168.121.34</font></div><div><font color="#000000">sefa@sefalap:~$ </font></div> 
+</font></div><font color=#550055><div>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br></i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div> 
+<div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div><br> 
+</div> 
+</font></font> <br clear="all"> <div style="width:50%;border-top:2px #AAAAAA solid"></div> <table class=att cellspacing=0 cellpadding=5 border=0><tr><td><table cellspacing=0 cellpadding=0><tr><td><a target=_blank href="?ui=2&ik=97fa7860ff&view=att&th=129c69f7bb04fd8d&attid=0.1&disp=inline&realattid=f_gbjaamsp0&zw"><img width=16 height=16 src="/a/bil.omu.edu.tr/images/txt.gif"></a></td><td width=7></td><td><b>sanal.txt</b><br/>3K </td></tr></table></td></tr></table> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 20 Temmuz 2010 14:45 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">sanal makinada bir desktop ubuntu kurdum ağ ayarlarında, &quot;şuraya eklendi&quot; kısmını : Bridged Adapter <u>yapmadıkça</u> sorun yok normal olarak açılıyor, makinayı kullanabiliyorum, ancak o kısmı Bridged Adapter olarak değiştirince<br> 
+aşağıda ekran görüntüsünü verdiğim hatayı alıyorum...<br><br><br><a href="https://dl-web.dropbox.com/get/Photos/Ekran%20G%C3%B6r%C3%BCnt%C3%BCs%C3%BC-VirtualBox%20-%20Hata-1.png?w=88d9d524" target="_blank">https://dl-web.dropbox.com/<WBR>get/Photos/Ekran%20G%C3%B6r%<WBR>C3%BCnt%C3%BCs%C3%BC-<WBR>VirtualBox%20-%20Hata-1.png?w=<WBR>88d9d524</a><br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emre can yılmaz &lt;can.yilmaz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 20 Temmuz 2010 18:28 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">resmi başka bir yere upload et bence . Dropbox malum özel bir alan ...<br><br><div class="gmail_quote">20 Temmuz 2010 14:45 tarihinde sefa yıldız <span dir="ltr">&lt;<a href="mailto:sefa.yildiz@bil.omu.edu.tr" target="_blank">sefa.yildiz@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="border-left:1px solid rgb(204, 204, 204);margin:0pt 0pt 0pt 0.8ex;padding-left:1ex">sanal makinada bir desktop ubuntu kurdum ağ ayarlarında, &quot;şuraya eklendi&quot; kısmını : Bridged Adapter <u>yapmadıkça</u> sorun yok normal olarak açılıyor, makinayı kullanabiliyorum, ancak o kısmı Bridged Adapter olarak değiştirince<br> 
+aşağıda ekran görüntüsünü verdiğim hatayı alıyorum...<br><br><br><a href="https://dl-web.dropbox.com/get/Photos/Ekran%20G%C3%B6r%C3%BCnt%C3%BCs%C3%BC-VirtualBox%20-%20Hata-1.png?w=88d9d524" target="_blank">https://dl-web.dropbox.com/<WBR>get/Photos/Ekran%20G%C3%B6r%<WBR>C3%BCnt%C3%BCs%C3%BC-<WBR>VirtualBox%20-%20Hata-1.png?w=<WBR>88d9d524</a><br> 
+</blockquote></font></div><br><br clear="all"><font color=#550055><br>-- <br>ecylmz(Emre Can YILMAZ)<br><a href="http://www.ecylmz.com" target="_blank">www.ecylmz.com</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> derya uzun &lt;derya.uzun@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 20 Temmuz 2010 18:48 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: emre can yılmaz &lt;can.yilmaz@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">kusura bakmayın aklıma gelmedi hatanın yeni adresi:<br><a href="http://i26.tinypic.com/2luqw7c.png" target="_blank">http://i26.tinypic.com/<WBR>2luqw7c.png</a><br><br>kendi hesabıma girecek vaktim yoktu:<br>-------<br>Sefa YILDIZ<br><br><br><div class="gmail_quote"> 
+20 Temmuz 2010 18:28 tarihinde emre can yılmaz <span dir="ltr">&lt;<a href="mailto:can.yilmaz@bil.omu.edu.tr" target="_blank">can.yilmaz@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex"> 
+resmi başka bir yere upload et bence . Dropbox malum özel bir alan ...<br><br><div class="gmail_quote">20 Temmuz 2010 14:45 tarihinde sefa yıldız <span dir="ltr">&lt;<a href="mailto:sefa.yildiz@bil.omu.edu.tr" target="_blank">sefa.yildiz@bil.omu.edu.tr</a>&gt;</span> yazdı:<div> 
+<br> 
+<blockquote class="gmail_quote" style="border-left:1px solid rgb(204, 204, 204);margin:0pt 0pt 0pt 0.8ex;padding-left:1ex">sanal makinada bir desktop ubuntu kurdum ağ ayarlarında, &quot;şuraya eklendi&quot; kısmını : Bridged Adapter <u>yapmadıkça</u> sorun yok normal olarak açılıyor, makinayı kullanabiliyorum, ancak o kısmı Bridged Adapter olarak değiştirince<br> 
+aşağıda ekran görüntüsünü verdiğim hatayı alıyorum...<br><br><br><a href="https://dl-web.dropbox.com/get/Photos/Ekran%20G%C3%B6r%C3%BCnt%C3%BCs%C3%BC-VirtualBox%20-%20Hata-1.png?w=88d9d524" target="_blank">https://dl-web.dropbox.com/<WBR>get/Photos/Ekran%20G%C3%B6r%<WBR>C3%BCnt%C3%BCs%C3%BC-<WBR>VirtualBox%20-%20Hata-1.png?w=<WBR>88d9d524</a><br> 
+</blockquote></div></div><br><br clear="all"><div><div></div><div><br>-- <br>ecylmz(Emre Can YILMAZ)<br><a href="http://www.ecylmz.com" target="_blank">www.ecylmz.com</a><br> 
+</div></div></blockquote></font></div><br> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 20 Temmuz 2010 19:04 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* derya uzun [2010-07-20 18:48:55+0300]<br /> 
+<font color=#550055>&gt; kusura bakmayın aklıma gelmedi hatanın yeni adresi:<br /> 
+&gt; <a href="http://i26.tinypic.com/2luqw7c.png" target="_blank">http://i26.tinypic.com/<wbr />2luqw7c.png</a><br /> 
+<br /> 
+</font><a href="https://jeremy.visser.name/2009/01/06/verr_supdrv_component_not_found-on-virtualbox/" target="_blank">https://jeremy.visser.name/<wbr />2009/01/06/verr_supdrv_<wbr />component_not_found-on-<wbr />virtualbox/</a><br /> 
+<br /> 
+kıssadan hisse: önce mutlaka hata mesajlarını aratın. &nbsp;burada tek<br /> 
+yaptığım google'da &quot;verr_supdrv_component_not_<wbr />found&quot; araması<br /> 
+yaptırmaktı. &nbsp;işine yarar mı o ayrı, ama deneyecek bir çözüm bulmuş<br /> 
+olduk.<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 21 Temmuz 2010 18:28 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">diğer forumlarda falan da baktım bu hata ile karşılaşanlar olmuş.<div>oralarda da, sizin verdiğiniz sayfada da  vboxnetflt eklentisini kurun diyor<div>komutu verince şu hatayı alıyorum:<br><div>~# modprobe vboxnetflt</div> 
+<div>FATAL: Error inserting vboxnetflt (/lib/modules/2.6.32-23-<WBR>generic/updates/dkms/<WBR>vboxnetflt.ko): Invalid module format</div><div><br></div><div class="gmail_quote">20 Temmuz 2010 19:04 tarihinde recai oktaş <span dir="ltr">&lt;<a href="mailto:roktas@bil.omu.edu.tr" target="_blank">roktas@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">* derya uzun [2010-07-20 18:48:55+0300]<br> 
+<div>&gt; kusura bakmayın aklıma gelmedi hatanın yeni adresi:<br> 
+&gt; <a href="http://i26.tinypic.com/2luqw7c.png" target="_blank">http://i26.tinypic.com/<WBR>2luqw7c.png</a><br> 
+<br> 
+</div><a href="https://jeremy.visser.name/2009/01/06/verr_supdrv_component_not_found-on-virtualbox/" target="_blank">https://jeremy.visser.name/<WBR>2009/01/06/verr_supdrv_<WBR>component_not_found-on-<WBR>virtualbox/</a><br> 
+<br> 
+kıssadan hisse: önce mutlaka hata mesajlarını aratın.  burada tek<br> 
+yaptığım google&#39;da &quot;verr_supdrv_component_not_<WBR>found&quot; araması<br> 
+yaptırmaktı.  işine yarar mı o ayrı, ama deneyecek bir çözüm bulmuş<br> 
+olduk.<br> 
+<font color="#888888"><br> 
+--<br> 
+roktas<br> 
+</font></blockquote></font></div><br><br clear="all"><font color=#550055><br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br></i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div> 
+<div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div><br> 
+</font></div></div> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 21 Temmuz 2010 18:35 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* sefa yıldız [2010-07-21 18:28:35+0300]<br /> 
+<font color=#550055>&gt; diğer forumlarda falan da baktım bu hata ile karşılaşanlar olmuş.<br /> 
+&gt; oralarda da, sizin verdiğiniz sayfada da &nbsp;vboxnetflt eklentisini kurun diyor<br /> 
+&gt; komutu verince şu hatayı alıyorum:<br /> 
+&gt; ~# modprobe vboxnetflt<br /> 
+&gt; FATAL: Error inserting vboxnetflt<br /> 
+&gt; (/lib/modules/2.6.32-23-<wbr />generic/updates/dkms/<wbr />vboxnetflt.ko): Invalid module<br /> 
+&gt; format<br /> 
+<br /> 
+</font>virtualbox'ı kurduktan sonra çekirdek (kernel) güncellemesi mi yaptın?<br /> 
+virtualbox kurulumunda hatırladığım bu modüller derleniyor. &nbsp;bence şunu<br /> 
+yap, virtualbox'ı tamamen kaldır (sanal makineler ve ev dizinindeki<br /> 
+ayarlar kalsın) tekrar kur. &nbsp;modüllerin güncellenmesi lazım.<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> hasan ayvaz &lt;hasan.ayvaz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 21 Temmuz 2010 18:54 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">arkadaşlar adım adım anlatıyor kurulumu yardımcı olabileceğini düşündüm..linke bakın:<br><br><a href="http://dijitalders.com/icerik-22-1943-sanal-makine-kurulumu-virtualbox-.html" target="_blank">http://dijitalders.com/icerik-<WBR>22-1943-sanal-makine-kurulumu-<WBR>virtualbox-.html</a><br><font color=#888888> 
+<br clear="all"><br>-- <br>ya olduğun gibi görün ya da göründüğün gibi ol... <br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 21 Temmuz 2010 19:27 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><div><font face="&#39;courier new&#39;, monospace">&quot;bu hatayi cekirdek yüzünden yapiyor. </font></div><div><font face="&#39;courier new&#39;, monospace"><br></font></div> 
+<div><font face="&#39;courier new&#39;, monospace">Pardusun cekirdegini yeniledikce bende bu hatayi aliyorum mesela simdi pardus 2009 kullaniyorum en son 2.6.30-121 cekirdegine gectim calisan virtualboxum uctu ve burada söylenen hatalarin aynisini aliyorum.</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="&#39;courier new&#39;, monospace">bir önceki 2.6.30_rc8-120 cekirdegi ile pardsumu actigimda ise virtualbox hicbir sorun vermeden tek bir ayar yapmadan calisiyor.</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="&#39;courier new&#39;, monospace">bu cekirdekmidir nedir zirt pirt yenileniyor yenilendikce yazilimlar kendini yenilemedigi icin sanirim böyle ortada kaliyoruz.&quot;</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="arial, helvetica, sans-serif">böyle demiş pardusun forumlarında birisi.</font></div><div> 
+<font face="arial, helvetica, sans-serif"><br></font></div><div><font face="arial, helvetica, sans-serif">bu arada geçende biliyorsunuz hocam sistemi baştan kurdum...</font></div> 
+<div><font face="arial, helvetica, sans-serif">öncesinde yedeğini aldığım ev dizinimdeki .VirtualBox dizinini yeni sitemde eski yerine koydum.</font></div><div><font face="arial, helvetica, sans-serif">tekrar vbox ı açınca ayarlar geri gelmişti ama açılmıyordu sistem yine bu hatayı veriyordu</font></div> 
+<div><font face="arial, helvetica, sans-serif">yani ben şimdi yine o dizinin yedeğini alsam gene aynısı olacak herhalde... bunu aşmanın yolu nedir?</font></div><div><font face="arial, helvetica, sans-serif"><br> 
+</font></div><div><font face="arial, helvetica, sans-serif"><br></font></div><div class="gmail_quote">21 Temmuz 2010 18:35 tarihinde recai oktaş <span dir="ltr">&lt;<a href="mailto:roktas@bil.omu.edu.tr" target="_blank">roktas@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"> 
+* sefa yıldız [2010-07-21 18:28:35+0300]<br> 
+<div>&gt; diğer forumlarda falan da baktım bu hata ile karşılaşanlar olmuş.<br> 
+&gt; oralarda da, sizin verdiğiniz sayfada da  vboxnetflt eklentisini kurun diyor<br> 
+&gt; komutu verince şu hatayı alıyorum:<br> 
+&gt; ~# modprobe vboxnetflt<br> 
+&gt; FATAL: Error inserting vboxnetflt<br> 
+&gt; (/lib/modules/2.6.32-23-<WBR>generic/updates/dkms/<WBR>vboxnetflt.ko): Invalid module<br> 
+&gt; format<br> 
+<br> 
+</div>virtualbox&#39;ı kurduktan sonra çekirdek (kernel) güncellemesi mi yaptın?<br> 
+virtualbox kurulumunda hatırladığım bu modüller derleniyor.  bence şunu<br> 
+yap, virtualbox&#39;ı tamamen kaldır (sanal makineler ve ev dizinindeki<br> 
+ayarlar kalsın) tekrar kur.  modüllerin güncellenmesi lazım.<br> 
+<font color="#888888"><br> 
+--<br> 
+roktas<br> 
+</font></blockquote></font></div><br><br clear="all">evet çekirdek güncellemesi yapmıştım<font color=#550055><br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br> 
+</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div> 
+<br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 21 Temmuz 2010 22:17 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">sorun çözüldü hocam ben sizi yanlış anlamışım vbox&#39;ı kaldırınca bütün hepsi silinecek sanıyordum  yedek falan almadan sadece kaldırıp tekrar kurdum şu anda sanal makina açılıyor...<div><br><div class="gmail_quote">21 Temmuz 2010 19:27 tarihinde sefa yıldız <span dir="ltr">&lt;<a href="mailto:sefa.yildiz@bil.omu.edu.tr" target="_blank">sefa.yildiz@bil.omu.edu.tr</a>&gt;</span> yazdı:<font color=#550055><br> 
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"><div><font face="&#39;courier new&#39;, monospace">&quot;bu hatayi cekirdek yüzünden yapiyor. </font></div><div><font face="&#39;courier new&#39;, monospace"><br> 
+</font></div> 
+<div><font face="&#39;courier new&#39;, monospace">Pardusun cekirdegini yeniledikce bende bu hatayi aliyorum mesela simdi pardus 2009 kullaniyorum en son 2.6.30-121 cekirdegine gectim calisan virtualboxum uctu ve burada söylenen hatalarin aynisini aliyorum.</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="&#39;courier new&#39;, monospace">bir önceki 2.6.30_rc8-120 cekirdegi ile pardsumu actigimda ise virtualbox hicbir sorun vermeden tek bir ayar yapmadan calisiyor.</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="&#39;courier new&#39;, monospace">bu cekirdekmidir nedir zirt pirt yenileniyor yenilendikce yazilimlar kendini yenilemedigi icin sanirim böyle ortada kaliyoruz.&quot;</font></div> 
+<div><font face="&#39;courier new&#39;, monospace"><br></font></div><div><font face="arial, helvetica, sans-serif">böyle demiş pardusun forumlarında birisi.</font></div><div> 
+<font face="arial, helvetica, sans-serif"><br></font></div><div><font face="arial, helvetica, sans-serif">bu arada geçende biliyorsunuz hocam sistemi baştan kurdum...</font></div> 
+<div><font face="arial, helvetica, sans-serif">öncesinde yedeğini aldığım ev dizinimdeki .VirtualBox dizinini yeni sitemde eski yerine koydum.</font></div><div><font face="arial, helvetica, sans-serif">tekrar vbox ı açınca ayarlar geri gelmişti ama açılmıyordu sistem yine bu hatayı veriyordu</font></div> 
+<div><font face="arial, helvetica, sans-serif">yani ben şimdi yine o dizinin yedeğini alsam gene aynısı olacak herhalde... bunu aşmanın yolu nedir?</font></div><div><font face="arial, helvetica, sans-serif"><br> 
+</font></div><div><font face="arial, helvetica, sans-serif"><br></font></div><div class="gmail_quote">21 Temmuz 2010 18:35 tarihinde recai oktaş <span dir="ltr">&lt;<a href="mailto:roktas@bil.omu.edu.tr" target="_blank">roktas@bil.omu.edu.tr</a>&gt;</span> yazdı:<div> 
+<div></div><div><br> 
+<blockquote class="gmail_quote" style="margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex"> 
+* sefa yıldız [2010-07-21 18:28:35+0300]<br> 
+<div>&gt; diğer forumlarda falan da baktım bu hata ile karşılaşanlar olmuş.<br> 
+&gt; oralarda da, sizin verdiğiniz sayfada da  vboxnetflt eklentisini kurun diyor<br> 
+&gt; komutu verince şu hatayı alıyorum:<br> 
+&gt; ~# modprobe vboxnetflt<br> 
+&gt; FATAL: Error inserting vboxnetflt<br> 
+&gt; (/lib/modules/2.6.32-23-<WBR>generic/updates/dkms/<WBR>vboxnetflt.ko): Invalid module<br> 
+&gt; format<br> 
+<br> 
+</div>virtualbox&#39;ı kurduktan sonra çekirdek (kernel) güncellemesi mi yaptın?<br> 
+virtualbox kurulumunda hatırladığım bu modüller derleniyor.  bence şunu<br> 
+yap, virtualbox&#39;ı tamamen kaldır (sanal makineler ve ev dizinindeki<br> 
+ayarlar kalsın) tekrar kur.  modüllerin güncellenmesi lazım.<br> 
+<font color="#888888"><br> 
+--<br> 
+roktas<br> 
+</font></blockquote></div></div></div><br><br clear="all">evet çekirdek güncellemesi yapmıştım<div><div></div><div><br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br> 
+</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div> 
+<br> 
+</div></div></blockquote></font></div><font color=#550055><br><br clear="all"><br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br></i></font></div><div> 
+<font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div> 
+<br> 
+</font></div> 
+</font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sedat geldi &lt;sedat.geldi@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 22 Temmuz 2010 17:38 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><br>virtualbox super bisey yaa ıstedıgın kadar ısletım sıstemi calıstırabılıosun :)<br><font color=#888888><br clear="all"><br>-- <br>Sedat <br>      GELDİ<br>19 Mayis Universitesi Bilgisayar Muhendisligi <br> 2. sinif ogrencisi<br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 26 Temmuz 2010 15:17 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: hasan ayvaz &lt;hasan.ayvaz@bil.omu.edu.tr&gt;</div> <div>Cc: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">Virtualbox kurulunca bildiğiniz gibi sanal makina tam ekran olarak kullanılmıyor.<br><br>Nasıl tam ekran olarak kullanılacağını anlatmaya çalıştım umarım yararlı olur...<br><br><a style="color:rgb(0, 0, 153)" href="http://sefay.github.com/100001/" target="_blank">http://sefay.github.com/<WBR>100001/</a><font color=#550055><br> 
+<br>-- <br><div><font face="georgia, serif">Bu güçten daha büyük güç yok...</font></div><div><font face="&#39;arial black&#39;, sans-serif"><i><br></i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>GNU&#39;s</i></font></div> 
+<div><font face="&#39;arial black&#39;, sans-serif"><i>NOT</i></font></div><div><font face="&#39;arial black&#39;, sans-serif"><i>UNIX</i></font></div><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 17:57 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">@roktas<br><br>hocam bayaa bir deneme yaptım ama çözemediğim bir durum var<br>sanal makina olarak ubuntu ve windowstan sonra debian kurmak istedim <br>ama bu sanal makina debinda kurulum esnasındaki cdrom algılama kısmında cdroom algılanamadı deyip duruyor<br> 
+sürekli cd kontrolü yapıyor<br>benim mi bir ihmalim söz konusu burda yoksa özel bir durum mu var?<br><br>sürüm: debian_504_lenny_i386<br><font color=#888888> 
+<p></p> 
+-- <br> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<WBR>smart-questions.html</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:11 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* emin eker [2010-08-06 17:57:05+0300]<br /> 
+<font color=#550055>&gt; @roktas<br /> 
+&gt;<br /> 
+&gt; hocam bayaa bir deneme yaptım ama çözemediğim bir durum var<br /> 
+&gt; sanal makina olarak ubuntu ve windowstan sonra debian kurmak istedim<br /> 
+&gt; ama bu sanal makina debinda kurulum esnasındaki cdrom algılama kısmında<br /> 
+&gt; cdroom algılanamadı deyip duruyor<br /> 
+&gt; sürekli cd kontrolü yapıyor<br /> 
+&gt; benim mi bir ihmalim söz konusu burda yoksa özel bir durum mu var?<br /> 
+<br /> 
+</font>hayır özel bir durum yok. &nbsp;iso'yu indirip cd-rom media olarak gösteriyor<br /> 
+ve kurulum yapıyorsun, hepsi bu kadar. &nbsp;belki senin durumda şöyle bir<br /> 
+şey oluyor. &nbsp;bir cd veya dvd iso seti indirip kurmaya çalışıyorsan<br /> 
+kurulum programı ekstra paket kurmak için diğer cd'leri taramak<br /> 
+istiyordur, örneğin ilk cd ile kuruluma başladın sonra ikinci vs<br /> 
+diğerlerini istiyor. &nbsp;bu taramayı iptal etmen ve sadece tek cd ile<br /> 
+kurulumu yapman lazım.<br /> 
+<br /> 
+alternatif olarak netinst imajını indirip kurulumu ağ üzerinden<br /> 
+yapabilirsin. &nbsp;böylece kurulum programı cd-rom'la hiç ilgilenmez.<br /> 
+<font color=#550055><br /> 
+&gt;<br /> 
+&gt; sürüm: debian_504_lenny_i386<br /> 
+&gt;<br /> 
+&gt; --<br /> 
+&gt; Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br /> 
+&gt; Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<wbr />smart-questions.html</a><br /> 
+<br /> 
+</font>a ha!<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font><font color=#550055><br /> 
+--<br /> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br /> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<wbr />smart-questions.html</a><br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:15 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><div> 
+</div><div class="gmail_quote"><font color=#550055><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex">hayır özel bir durum yok.  iso&#39;yu indirip cd-rom media olarak gösteriyor<br> 
+ve kurulum yapıyorsun, hepsi bu kadar.  belki senin durumda şöyle bir<br> 
+şey oluyor.  bir cd veya dvd iso seti indirip kurmaya çalışıyorsan<br> 
+kurulum programı ekstra paket kurmak için diğer cd&#39;leri taramak<br> 
+istiyordur, örneğin ilk cd ile kuruluma başladın sonra ikinci vs<br> 
+diğerlerini istiyor.  bu taramayı iptal etmen ve sadece tek cd ile<br> 
+kurulumu yapman lazım.<br></blockquote></font><div><br>debian&#39;ın resmi sitesindeki iso bir set değil <br>diğer ubuntu windowsun ki gibi <br>sorun bende o zaman yeniden bakmam gerekli <br></div><font color=#550055><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex"> 
+<br> 
+alternatif olarak netinst imajını indirip kurulumu ağ üzerinden<br> 
+yapabilirsin.  böylece kurulum programı cd-rom&#39;la hiç ilgilenmez.<br> 
+<div><br></div></blockquote><br></font></div><font color=#550055><br> 
+<p></p> 
+-- <br> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<WBR>smart-questions.html</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:20 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* emin eker [2010-08-06 18:15:08+0300]<br /> 
+<font color=#550055>&gt; &gt; hayır özel bir durum yok. &nbsp;iso'yu indirip cd-rom media olarak gösteriyor<br /> 
+&gt; &gt; ve kurulum yapıyorsun, hepsi bu kadar. &nbsp;belki senin durumda şöyle bir<br /> 
+&gt; &gt; şey oluyor. &nbsp;bir cd veya dvd iso seti indirip kurmaya çalışıyorsan<br /> 
+&gt; &gt; kurulum programı ekstra paket kurmak için diğer cd'leri taramak<br /> 
+&gt; &gt; istiyordur, örneğin ilk cd ile kuruluma başladın sonra ikinci vs<br /> 
+&gt; &gt; diğerlerini istiyor. &nbsp;bu taramayı iptal etmen ve sadece tek cd ile<br /> 
+&gt; &gt; kurulumu yapman lazım.<br /> 
+&gt; &gt;<br /> 
+&gt;<br /> 
+&gt; debian'ın resmi sitesindeki iso bir set değil<br /> 
+&gt; diğer ubuntu windowsun ki gibi<br /> 
+&gt; sorun bende o zaman yeniden bakmam gerekli<br /> 
+<br /> 
+</font>ağdan kurulumla fazla uğraşmak istemiyorsan şu yeterli olmalı:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-CD-1.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-CD-1.iso</a><br /> 
+<br /> 
+ama ben çoğunlukla ağdan kurulum yapıyorum:<br /> 
+<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp;<a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-netinst.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-netinst.iso</a><br /> 
+<br /> 
+netinst imajının diğerlerinden farkı şu: sadece gerekli çekirdek,<br /> 
+sürücüler ve baz paketleri kuruyor. &nbsp;kalanını ağdan tamamlıyor. &nbsp;o<br /> 
+yüzden de boyutu daha az (~150 MB civarı)<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font><font color=#550055><br /> 
+--<br /> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br /> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<wbr />smart-questions.html</a><br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:28 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><font color=#550055> 
+<div class="gmail_quote"><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex">ağdan kurulumla fazla uğraşmak istemiyorsan şu yeterli olmalı:<br> 
+<br> 
+       <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-CD-1.iso" target="_blank">http://cdimage.debian.org/<WBR>cdimage/squeeze_di_alpha1/<WBR>i386/iso-cd/debian-testing-<WBR>i386-CD-1.iso</a><br> 
+<br> 
+ama ben çoğunlukla ağdan kurulum yapıyorum:<br> 
+<br> 
+       <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-netinst.iso" target="_blank">http://cdimage.debian.org/<WBR>cdimage/squeeze_di_alpha1/<WBR>i386/iso-cd/debian-testing-<WBR>i386-netinst.iso</a><br> 
+<br> 
+netinst imajının diğerlerinden farkı şu: sadece gerekli çekirdek,<br> 
+sürücüler ve baz paketleri kuruyor.  kalanını ağdan tamamlıyor.  o<br> 
+yüzden de boyutu daha az (~150 MB civarı)<br> 
+<div><div></div><br></div></blockquote></div><br></font>hocam lafı açılmışken sorayım <br>aslında debian kullanıp gerektiğinde sanal makinada ubuntu kullanmak mı <br>yoksa ubuntu kullanıp önce bir debiana alışma süreci mi yaşamak karar kılamadım bu anlamda<br> 
+debiana geçiş süreci (alışmak anlamında) sıkıntılı mıdır kasar mı<font color=#550055><br><br> 
+<p></p> 
+-- <br> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<WBR>smart-questions.html</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> recai oktaş &lt;roktas@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:39 </b></font> <tr> <td colspan="2"> <font size="-1"> <div>Yanıtlama Adresi: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">* emin eker [2010-08-06 18:28:56+0300]<br /> 
+<font color=#550055>&gt; &gt;<br /> 
+&gt; &gt; ağdan kurulumla fazla uğraşmak istemiyorsan şu yeterli olmalı:<br /> 
+&gt; &gt;<br /> 
+&gt; &gt;<br /> 
+&gt; &gt; <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-CD-1.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-CD-1.iso</a><br /> 
+&gt; &gt;<br /> 
+&gt; &gt; ama ben çoğunlukla ağdan kurulum yapıyorum:<br /> 
+&gt; &gt;<br /> 
+&gt; &gt;<br /> 
+&gt; &gt; <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-netinst.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-netinst.iso</a><br /> 
+&gt; &gt;<br /> 
+&gt; &gt; netinst imajının diğerlerinden farkı şu: sadece gerekli çekirdek,<br /> 
+&gt; &gt; sürücüler ve baz paketleri kuruyor. &nbsp;kalanını ağdan tamamlıyor. &nbsp;o<br /> 
+&gt; &gt; yüzden de boyutu daha az (~150 MB civarı)<br /> 
+&gt; &gt;<br /> 
+&gt; &gt;<br /> 
+&gt; hocam lafı açılmışken sorayım<br /> 
+&gt; aslında debian kullanıp gerektiğinde sanal makinada ubuntu kullanmak mı<br /> 
+&gt; yoksa ubuntu kullanıp önce bir debiana alışma süreci mi yaşamak karar<br /> 
+&gt; kılamadım bu anlamda<br /> 
+&gt; debiana geçiş süreci (alışmak anlamında) sıkıntılı mıdır kasar mı<br /> 
+<br /> 
+</font>kafanıza göre :-) &nbsp;masaüstünde ubuntu size daha kolay gelir, o bakımdan<br /> 
+öneriyorum. &nbsp;partizan değilim bu konuda...<br /> 
+<font color=#888888><br /> 
+--<br /> 
+roktas<br /> 
+</font><font color=#550055><br /> 
+--<br /> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br /> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<wbr />smart-questions.html</a><br /> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> emin eker &lt;emin.eker@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 18:49 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1"><div> 
+</div><div class="gmail_quote"><font color=#550055><blockquote class="gmail_quote" style="margin:0pt 0pt 0pt 0.8ex;border-left:1px solid rgb(204, 204, 204);padding-left:1ex">kafanıza göre :-)  masaüstünde ubuntu size daha kolay gelir, o bakımdan<br> 
+öneriyorum.  partizan değilim bu konuda...<br></blockquote></font><div><br>teşekkür ettim<br></div></div><font color=#550055> 
+<p></p> 
+-- <br> 
+Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br> 
+Doğru Düzgün Soru Sormanın Yolları - <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<WBR>smart-questions.html</a><br> 
+</font></font> </table> </table> <hr> <table width="100%" cellpadding="0" cellspacing="0" border="0"> <tr> <td> <font size="-1"><b> sefa yıldız &lt;sefa.yildiz@bil.omu.edu.tr&gt; </b></font> </td> <td align="right"> <font size="-1"><b> 06 Ağustos 2010 22:07 </b></font> <tr> <td colspan="2"> <font size="-1"> <div> Kime: bir bilen &lt;bilen@bil.omu.edu.tr&gt;</div> </font> <tr> <td colspan="2"> <table width="100%" cellpadding="12" cellspacing="0" border="0"> <tr> <td> <font size="-1">Tıpkı archlinux gibi hocam :-P hani debian da grafik kurulum arayüzü<br /> 
+falan bile olmaması eksi olarak gösteriliyor ya ben de çok kızıyordum<br /> 
+aslında buna ama arch kurarkenki o kara ekranla cebelleşmelerim beni<br /> 
+canımdan o kadar bezdirdi &nbsp;ki debian kurmak ne kadar kolaymış diyorum<br /> 
+artık. Ama en azından gerçekten öz[1] (harbiden öz ama :-) ) ve yalın<br /> 
+bir sistemi az çok birşeye benzer hale getirmenin gururu içindeyim<br /> 
+:-)ssh ile bağlanma çabaları bile yeter aslında :-), insana çok şey<br /> 
+katıyor herkese tavsiye ederim...<br /> 
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;[1]:archlinux kurulunca sadece sistemin<br /> 
+gerçekten özü kuruluyor hiç bi şey yok sadece gerçek bir terminal var<br /> 
+karşınızda. &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Not:telefondan yazdığım için biçim<br /> 
+hataları olabilir bunun için özür dilerim<br /> 
+<br /> 
+06 08 2010 tarihinde recai oktaş &lt;<a href="mailto:roktas@bil.omu.edu.tr">roktas@bil.omu.edu.tr</a>&gt; yazmış:<br /> 
+<font color=#550055>&gt; * emin eker [2010-08-06 18:15:08+0300]<br /> 
+&gt;&gt; &gt; hayır özel bir durum yok. &nbsp;iso'yu indirip cd-rom media olarak gösteriyor<br /> 
+&gt;&gt; &gt; ve kurulum yapıyorsun, hepsi bu kadar. &nbsp;belki senin durumda şöyle bir<br /> 
+&gt;&gt; &gt; şey oluyor. &nbsp;bir cd veya dvd iso seti indirip kurmaya çalışıyorsan<br /> 
+&gt;&gt; &gt; kurulum programı ekstra paket kurmak için diğer cd'leri taramak<br /> 
+&gt;&gt; &gt; istiyordur, örneğin ilk cd ile kuruluma başladın sonra ikinci vs<br /> 
+&gt;&gt; &gt; diğerlerini istiyor. &nbsp;bu taramayı iptal etmen ve sadece tek cd ile<br /> 
+&gt;&gt; &gt; kurulumu yapman lazım.<br /> 
+&gt;&gt; &gt;<br /> 
+&gt;&gt;<br /> 
+&gt;&gt; debian'ın resmi sitesindeki iso bir set değil<br /> 
+&gt;&gt; diğer ubuntu windowsun ki gibi<br /> 
+&gt;&gt; sorun bende o zaman yeniden bakmam gerekli<br /> 
+&gt;<br /> 
+&gt; ağdan kurulumla fazla uğraşmak istemiyorsan şu yeterli olmalı:<br /> 
+&gt;<br /> 
+&gt;<br /> 
+&gt; <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-CD-1.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-CD-1.iso</a><br /> 
+&gt;<br /> 
+&gt; ama ben çoğunlukla ağdan kurulum yapıyorum:<br /> 
+&gt;<br /> 
+&gt;<br /> 
+&gt; <a href="http://cdimage.debian.org/cdimage/squeeze_di_alpha1/i386/iso-cd/debian-testing-i386-netinst.iso" target="_blank">http://cdimage.debian.org/<wbr />cdimage/squeeze_di_alpha1/<wbr />i386/iso-cd/debian-testing-<wbr />i386-netinst.iso</a><br /> 
+&gt;<br /> 
+&gt; netinst imajının diğerlerinden farkı şu: sadece gerekli çekirdek,<br /> 
+&gt; sürücüler ve baz paketleri kuruyor. &nbsp;kalanını ağdan tamamlıyor. &nbsp;o<br /> 
+&gt; yüzden de boyutu daha az (~150 MB civarı)<br /> 
+&gt;<br /> 
+&gt; --<br /> 
+&gt; roktas<br /> 
+&gt;<br /> 
+&gt; --<br /> 
+&gt; Yazmadan önce lütfen aşağıdaki belgeyi okuyun.<br /> 
+&gt; Doğru Düzgün Soru Sormanın Yolları -<br /> 
+&gt; <a href="http://www.belgeler.org/howto/smart-questions.html" target="_blank">http://www.belgeler.org/howto/<wbr />smart-questions.html</a><br /> 
+&gt;<br /> 
+<br /> 
+<br /> 
+</font><font color=#888888>--<br /> 
+`Arch Linux, ne istemişseniz odur.`<br /> 
+</font></font> </table> </table> <hr> </body> </html> 
