@@ -1,1 +1,27 @@
-My GitHub Page
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>sayz | file</title>
+        <meta name="keywords" content="" />
+        <meta name="description" content="" />
+        <link href="css/default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="js/jquery-1.5.2.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function()
+            {
+                setInterval("cursorAnimation()", 500);
+            });
+
+            function cursorAnimation() 
+            {
+                $("span.cursor").animate({opacity: 0}, "fast", "swing").animate({opacity: 1}, "fast", "swing");
+            }
+        </script>
+    </head>
+    <body>
+        <div id="codeblock">
+            <span class="prompt">sayz@ezelterex ~ $</span><span class="caption"></span><span class="cursor">❚</span>
+        </div>
+    </body>
+</html>
